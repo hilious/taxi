@@ -585,14 +585,14 @@ if(/^(W6|W4|5W)$/.test(pre)&&s===220)s=239;
 var fa=FBA[pre],lf=(FBL[fa?fa[1]:"leg"]||FBL.leg)[mo];return Math.round(s*lf/5)*5}
 function lcl(d){return d.getFullYear()+"-"+z2(d.getMonth()+1)+"-"+z2(d.getDate())+"T"+z2(d.getHours())+":"+z2(d.getMinutes())}
 function acfg(){try{return JSON.parse(localStorage.getItem("apicfg")||"{}")}catch(e){return{}}}
-function acfgAsk(){var c=acfg(),k=prompt("RapidAPI kulcs (X-RapidAPI-Key)",c.k||"");if(k&&k.trim()){try{localStorage.setItem("apicfg",JSON.stringify({k:k.trim()}))}catch(e){}return acfg()}return null}
+function acfgAsk(){var c=acfg(),k=prompt("API.Market kulcs",c.k||"");if(k&&k.trim()){try{localStorage.setItem("apicfg",JSON.stringify({k:k.trim()}))}catch(e){}return acfg()}return null}
 function lt(s){var m=/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/.exec(s||"");return m?{d:m[1],m:+m[2]*60+ +m[3]}:null}
 async function apiRun(){var st=$("apiSt"),c=acfg();
-if(!c.k&&(!c.u||!c.t)){c=acfgAsk();if(!c){st.textContent="Add meg a RapidAPI kulcsot (⚙).";return}}
+if(!c.k&&(!c.u||!c.t)){c=acfgAsk();if(!c){st.textContent="Add meg az API.Market kulcsot (⚙).";return}}
 var now=new Date(),base=new Date(now.getFullYear(),now.getMonth(),now.getDate()),sm=now.getHours()*60+now.getMinutes(),start=Math.floor(sm/60)*60,end=start+360,
 f0=new Date(base),f1=new Date(base);f0.setMinutes(start);f1.setMinutes(end-1);
 st.textContent="Lekérés…";
-var r=c.k?await fetch("https://aerodatabox.p.rapidapi.com/flights/airports/iata/BUD/"+lcl(f0)+"/"+lcl(f1)+"?direction=Arrival&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false&withLocation=false",{headers:{"X-RapidAPI-Key":c.k,"X-RapidAPI-Host":"aerodatabox.p.rapidapi.com"}}):await fetch(c.u+"/?from="+lcl(f0)+"&to="+lcl(f1),{headers:{"x-app-token":c.t}});
+var r=c.k?await fetch("https://prod.api.market/api/v1/aedbx/aerodatabox/flights/airports/iata/BUD/"+lcl(f0)+"/"+lcl(f1)+"?direction=Arrival&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false&withLocation=false",{headers:{"x-api-market-key":c.k}}):await fetch(c.u+"/?from="+lcl(f0)+"&to="+lcl(f1),{headers:{"x-app-token":c.t}});
 if(r.status===401||r.status===403){st.textContent="Hibás kulcs vagy nincs előfizetés az Aero DataBoxra (⚙).";return}
 if(!r.ok){st.textContent="Hiba: "+r.status+(r.status===429?" (elfogyott a lekérési keret)":"");return}
 var j=await r.json(),A=j.arrivals||[],L=[],seen={},canc=0;
