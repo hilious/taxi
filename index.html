@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taxis app</title>
+<style>
+:root{--bg:#fafaf7;--card:#fff;--tx:#1b1b18;--mu:#6b6b63;--ac:#d98e04;--bd:#e4e2da;--hi:#fff3d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141412;--card:#1f1f1c;--tx:#f0efe8;--mu:#a2a198;--ac:#f5b32e;--bd:#33332e;--hi:#3a2f12}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:12px}
+header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+h1{font-size:18px;margin:0;flex:1}
+button{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 12px}
+button.p{background:var(--ac);color:#1b1b18;border-color:var(--ac);font-weight:600}
+.day{text-align:center;font-weight:600}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:10px 0}
+.end{background:var(--hi);border-radius:10px;padding:8px 10px;margin:8px 0;font-weight:600}
+.mu{color:var(--mu);font-size:14px}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--bd);border-radius:20px;padding:1px 8px;margin-right:4px;color:var(--mu)}
+input{font:inherit;width:100%;padding:8px;margin:4px 0;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+h3{font-size:15px;margin:18px 0 4px}
+
+[hidden]{display:none!important}
+a.big{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;padding:16px;background:var(--card);border:1px solid var(--bd);border-radius:14px;color:var(--tx);text-decoration:none;margin:8px 0}
+a.back{display:inline-block;margin-bottom:8px;color:var(--ac);text-decoration:none;font-weight:600}
+select{font:inherit;width:100%;padding:8px;margin:4px 0;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+.row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.row button{padding:2px 8px}
+.num{font-size:26px;font-weight:700}
+.bad{border-color:#c0392b!important}
+.sub{border-top:1px solid var(--bd);margin-top:10px;padding-top:6px}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(20px + env(safe-area-inset-bottom,0px));padding:14px;border-radius:12px;text-align:center;font-weight:600;color:#fff;z-index:20;display:none}
+#toast.ok{background:#1f8a4c}#toast.no{background:#c0392b}
+#v-szimulacio{--s:1;--k:calc(var(--s)*1.055vw);position:fixed;inset:0;z-index:15;overflow-y:auto;background:#000;color:#fff;font-family:Roboto,Arial,sans-serif}
+.zP{width:100%;position:relative;min-height:100dvh;background:#000;padding-top:env(safe-area-inset-top,0px)}
+.zBk{position:absolute;left:calc(2.5*var(--k));top:calc(3*var(--k));color:#777;text-decoration:none;font-size:calc(7*var(--k));z-index:6}
+.zT{text-align:center;font-weight:700;font-size:calc(4.8*var(--k));height:calc(20*var(--k));line-height:calc(20*var(--k))}
+.zK{position:relative;height:calc(16*var(--k))}.zK span{position:absolute;left:0;right:0;top:0;text-align:center;line-height:calc(3*var(--k));font-size:calc(4*var(--k));font-family:monospace;font-weight:700}
+.zK i{position:absolute;right:calc(2.6*var(--k));top:-calc(1.2*var(--k));width:calc(12.8*var(--k));height:calc(12.8*var(--k));border-radius:50%;background:#f00}.zK i:after{content:"";position:absolute;inset:calc(3.6*var(--k));border-radius:50%;border:calc(.9*var(--k)) solid rgba(255,255,255,.9)}
+.zh .zT,.zh .zK{display:none}.zh .zM{padding-top:calc(6*var(--k))}
+.zM{margin:0}
+.zTb{display:flex;height:calc(12.6*var(--k))}.zTb div{flex:1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:calc(4.5*var(--k));background:#b0adad;color:#fff}.zTb .on{background:#7dc680}
+.zL{background:#131313;min-height:calc(100dvh - calc(48.6*var(--k)))}
+.zRf{height:calc(26*var(--k));display:flex;justify-content:center;padding-top:calc(6.2*var(--k))}.zRf button{width:calc(11.1*var(--k));height:calc(11.1*var(--k));border-radius:50%;background:#1ca3e6;border:0;color:#0b3a5e;font-size:calc(7*var(--k));line-height:1;padding:0}
+.zA{display:grid;grid-template-columns:19.2% 30.8% 27% 23%;text-align:center;border-top:1px solid #444;border-bottom:1px solid #444;height:calc(10.1*var(--k));align-items:center;font-weight:700;font-size:calc(3.7*var(--k))}
+.zE{text-align:center;height:calc(9.9*var(--k));line-height:calc(9.9*var(--k));font-weight:700;font-size:calc(3.6*var(--k));border-bottom:1px solid #444}
+.zH{display:flex;align-items:center;height:calc(10.1*var(--k));border-bottom:1px solid #444;font-weight:700;font-size:calc(3.7*var(--k))}.zH span:first-child{width:19.2%;text-align:center}.zH span:last-child{width:23%;text-align:center}.zH span:nth-child(2){flex:1;padding-left:5%}
+.zAd{background:#a8a8ab;color:#fff;padding:0 calc(2.3*var(--k));height:calc(10.3*var(--k));line-height:calc(10.3*var(--k));font-size:calc(3.6*var(--k));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zR{display:flex;align-items:center;height:calc(14.9*var(--k));font-size:calc(3.5*var(--k));border-bottom:1px solid #333}.zR span:first-child{width:24.2%;padding-left:3.9%}.zR span:nth-child(2){flex:1}
+.zC{width:calc(7.2*var(--k));height:calc(7.2*var(--k));border-radius:50%;margin-right:calc(7.3*var(--k));border:0;padding:0;font-size:calc(4.5*var(--k));background:#34d27c;color:#111}.zC.zN{background:#d4d4d4;color:#555}
+#sMd{position:fixed;top:calc(38.8*var(--k));left:calc(2.5*var(--k));right:calc(2.5*var(--k));z-index:5;background:#2a2527;border-radius:calc(2*var(--k));box-shadow:0 calc(1*var(--k)) calc(4*var(--k)) rgba(0,0,0,.6)}
+.zQ{padding:calc(4*var(--k)) calc(4.5*var(--k));font-weight:700;font-size:calc(3.9*var(--k));line-height:1.5}
+.zB{display:flex;justify-content:space-between;align-items:center;padding:calc(3*var(--k)) calc(4*var(--k));border-top:1px solid #666}.zB button{border:0;color:#fff;background:#1a7cf2;border-radius:calc(1.6*var(--k));width:calc(12*var(--k));height:calc(10.2*var(--k));font-size:calc(4.6*var(--k));padding:0}.zB .zX{width:calc(20*var(--k));background:#aeb9bd;font-size:calc(3.8*var(--k))}
+#sRes{position:fixed;left:calc(3*var(--k));right:calc(3*var(--k));bottom:calc(5*var(--k));z-index:16;display:none;padding:calc(3.5*var(--k));border-radius:calc(2*var(--k));color:#fff;font-weight:700;text-align:center;font-size:calc(3.9*var(--k))}
+.zS{padding:calc(6*var(--k)) calc(4*var(--k)) calc(14*var(--k));background:#000}
+.zCt{position:fixed;left:8px;bottom:8px;display:flex;gap:6px;z-index:17}.zCt button{width:38px;height:38px;background:rgba(60,60,60,.85);color:#ddd;border:0;border-radius:8px;font-size:18px;padding:0}
+.mai{position:absolute;top:8px;right:10px;background:var(--ac);color:#1b1b18;font-weight:700;font-size:12px;padding:2px 9px;border-radius:10px}
+</style>
+</head>
+<body><div id="toast"></div>
+<div id="cf" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px"><div class="card" style="max-width:360px;width:100%"><div id="cfm" style="font-weight:600;margin-bottom:12px"></div><div style="display:flex;gap:8px"><button class="p" id="cfY" style="flex:1">Igen, mentem</button><button id="cfN" style="flex:1">Mégse</button></div></div></div>
+<section id="v-home">
+<h1 style="margin:4px 0 8px">🚕 Taxis app</h1>
+<a class="big" href="#naptar">📅 Naptár és szórakozóhelyek</a>
+<a class="big" href="#repter">✈️ Reptér – érkező járatok</a>
+<a class="big" href="#penzugyek">💰 Pénzügyek</a>
+<a class="big" href="#elorendelesek">📋 Előrendelések és céges címek</a>
+<a class="big" href="#szimulacio">🎯 Előrendelés szimuláció</a>
+<h3>Új fuvar (dispó)</h3>
+<div class="card" id="rForm">
+<div class="mu">Fuvar típusa *</div>
+<select id="rTy"><option value="">Válassz…</option><option>Reptér</option><option>Előrendelés</option><option>Beülős</option><option>Droszt</option><option>Applikáció</option></select>
+<label style="display:flex;align-items:center;gap:8px;margin:6px 0"><input type="checkbox" id="rCo" style="width:auto;margin:0">Céges rendelés</label>
+<div id="rPre" hidden><input id="rNm" placeholder="Név (nem kötelező)"><div class="mu">Előrendelés időpontja *</div><input id="rBt" type="time"></div>
+<div id="rAir" hidden><input id="rZn" type="number" inputmode="numeric" placeholder="Zónakód (nem kötelező)"></div>
+<div id="rAd"></div>
+<div id="rEx"></div>
+<div style="display:flex;gap:8px;margin:6px 0"><button type="button" id="rMore">+ További cím</button><button type="button" id="rLess" hidden>– Utolsó cím törlése</button></div>
+<input id="rTo" placeholder="Hova (nem kötelező)">
+<div class="mu" style="margin-top:8px">Fuvardíj és fizetés *</div>
+<input id="rAmt" type="number" inputmode="numeric" placeholder="Fuvardíj (Ft)">
+<select id="rPay"><option>Készpénz</option><option>Kártya</option><option>Klasszikus igazoló</option><option>8jegyű igazoló</option><option>Taxi kártya</option><option>Taxi app</option><option>Mobilkód</option><option>Revolut</option></select>
+<button class="p" id="rAdd" style="margin-top:6px">Fuvar mentése</button> <button type="button" id="rCancel" hidden>Módosítás elvetése</button>
+<div class="mu">A dátumot és az időt mentéskor automatikusan rögzíti.</div>
+</div>
+<h3>Tankolás</h3>
+<div class="card"><input id="fA" type="number" inputmode="numeric" enterkeyhint="done" placeholder="Összeg (Ft) – a billentyűzet OK gombjával mentődik"><button class="p" id="fAdd" style="margin-top:6px">Tankolás mentése</button> <button id="fCan" hidden>Mégse</button><div class="mu" id="fW" style="margin-top:8px"></div></div>
+<h3>Egyéb költség</h3>
+<div class="card"><input id="oA" type="number" inputmode="numeric" placeholder="Összeg (Ft)"><input id="oD" placeholder="Leírás (nem kötelező)"><button class="p" id="oAdd" style="margin-top:6px">Költség mentése</button> <button id="oCan" hidden>Mégse</button></div>
+<h3>Legutóbbi mentések</h3>
+<div class="card" id="recent"></div>
+<div class="mu" id="synS" style="margin-top:14px"></div><button id="synB" style="margin-top:6px">Szinkronizálás most</button>
+</section>
+<section id="v-naptar" hidden><a class="back" href="#">‹ Főoldal</a>
+
+<header><h1>📅 Naptár és szórakozóhelyek</h1><button id="t">Ma</button></header>
+<div class="card" style="display:flex;align-items:center;gap:8px"><button id="pv">‹</button><div class="day" style="flex:1" id="dl"></div><button id="nx">›</button></div>
+<div id="rpN"></div>
+<div id="drN"></div>
+<div id="list"></div>
+<div id="szN"></div>
+<h3>Következő nagy események</h3>
+<div id="next"></div>
+<div id="szL"></div>
+<h3>Saját esemény</h3>
+<div class="card">
+<input id="fn" placeholder="Név">
+<input id="fv" placeholder="Helyszín">
+<input id="fd" type="date">
+<input id="fs" type="time" placeholder="Kezdés">
+<input id="fc" type="number" placeholder="Becsült létszám">
+<button class="p" id="add" style="margin-top:6px">Hozzáadás</button>
+</div>
+<p class="mu">Az adatok webes keresésből származnak, a létszám a helyszín kapacitásából becsült. Kezdés előtt érdemes ellenőrizni a szervező oldalán.</p>
+
+</section>
+<section id="v-penzugyek" hidden><a class="back" href="#">‹ Főoldal</a><div id="fin"></div></section>
+<section id="v-elorendelesek" hidden><a class="back" href="#">‹ Főoldal</a><div id="preL"></div></section>
+<section id="v-cim" hidden><a class="back" href="#elorendelesek">‹ Előrendelések</a><div id="cimB"></div></section>
+<section id="v-dispo" hidden><a class="back" href="#elorendelesek" id="disBack">‹ Vissza</a><div id="disB"></div></section>
+<section id="v-nap" hidden><a class="back" href="#penzugyek">‹ Pénzügyek</a><div id="napB"></div></section>
+<section id="v-szorakozohelyek" hidden><a class="back" href="#">‹ Főoldal</a><h1 style="font-size:18px">🎶 Szórakozóhelyek</h1><div id="szB"></div></section>
+<section id="v-hely" hidden><a class="back" href="#naptar">‹ Naptár</a><div id="hlB"></div></section>
+<section id="v-szimulacio" hidden><div class="zP">
+<a href="#" class="zBk">‹</a>
+<div class="zT">ELŐRENDELÉSEK</div>
+<div class="zK"><span id="sTm">00:00:00</span><i></i></div>
+<div class="zM"><div class="zTb"><div class="on">ELŐRENDELÉSEK</div><div>VISSZAFUVAR</div></div>
+<div class="zL"><div class="zRf"><button id="sRef" aria-label="Frissítés">⟳</button></div>
+<div class="zA"><span>Extrák</span><span>Előrendelés</span><span>Ébresztés</span><span>Lemond</span></div>
+<div class="zE">Elérhető előrendelések</div>
+<div class="zH"><span>Extrák</span><span>Előrendelés</span><span>Vállal</span></div>
+<div id="sList"></div></div></div>
+<div id="sMd" hidden></div></div>
+<div id="sRes"></div>
+<div class="zS"><h3>Statisztika</h3><div class="card" id="sSt"></div><button id="sRst" style="margin-top:8px">Statisztika törlése</button></div>
+<div class="zCt"><button id="zMi">−</button><button id="zPl">+</button><button id="zHd" title="Fejléc">⇧</button><button id="zFs" title="Teljes képernyő">⛶</button></div></section>
+<section id="v-repter" hidden><a class="back" href="#">‹ Főoldal</a><h1 style="font-size:18px">✈️ Érkező járatok (BUD)</h1>
+<div id="rpU" class="card" hidden><b>📷 Új lekérés képernyőképekből</b><div class="mu" style="margin:4px 0 8px">Töltsd fel a bud.hu érkező járatok képernyőképeit (felülről lefelé görgetve, átfedéssel). Az app felismeri a járatokat, és kiszámolja az órás listát, az utasszámokat és a csúcsokat. A feldolgozás a te Claude-használatodat terheli.</div><input type="file" id="rpF" accept="image/*" multiple><button class="p" id="rpGo" style="margin-top:8px">Feldolgozás</button><div class="mu" id="rpSt" style="margin-top:6px"></div></div>
+<div id="rpU" class="card" hidden><b>📷 Új lekérés képernyőképekből</b><div class="mu" style="margin:6px 0">Töltsd fel a bud.hu érkező járatok listájának képernyőképeit (görgetve, kis átfedéssel). Claude kiolvassa a járatokat, és az aktuális órától a következő 6 órára kiszámolja a listát.</div><input type="file" id="rpF" accept="image/*" multiple style="display:none"><input type="file" id="rpC" accept="image/*" capture="environment" style="display:none">
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="rpPk">📁 Képek kiválasztása</button><button type="button" id="rpCam">📷 Fotó készítése</button><button type="button" id="rpClr">Törlés</button></div>
+<div id="rpPs" contenteditable="true" style="border:1px dashed var(--bd);border-radius:8px;padding:10px;margin-top:8px;min-height:44px;color:var(--mu)">Ha a kiválasztás nem nyílik meg: másold ki a képet, nyomd hosszan ide, és válaszd a Beillesztést.</div>
+<div class="mu" id="rpCnt" style="margin-top:4px"></div><button class="p" id="rpGo" style="margin-top:6px">Feldolgozás</button><div class="mu" id="rpM" style="margin-top:6px"></div></div>
+<div class="card"><b>⟳ Frissítés (Aero DataBox)</b><div class="mu" style="margin:4px 0 8px">Lekéri a következő 6 óra érkező járatait, és elmenti. Legközelebb az utolsó lekérést látod, amíg újra nem frissítesz.</div><div style="display:flex;gap:8px"><button class="p" id="apiGo" style="flex:1">⟳ Frissítés</button><button id="apiCfg" title="Beállítás">⚙</button></div><div class="mu" id="apiSt" style="margin-top:6px"></div></div>
+<div id="rpB"></div></section>
+<section id="v-autosor" hidden><a class="back" href="#repter">‹ Reptér</a><div id="tqN" class="card mu" hidden>Nincs reptéri lekérés. Előbb kérj le járatokat a Reptér oldalon.</div>
+<div id="tqC" class="card" hidden><b>🚕 Autó-sor becslés</b>
+<div class="mu" style="margin:4px 0 8px">Add meg, hány autó vár most a reptéren. A program a járatok utasbecsléséből kiszámolja, mennyi autó fogy el, és mennyi ér vissza, és kiírja, mikor lesz autóhiány. Egy gép autóigénye = utasszám × taxis arány ÷ utas/autó.</div>
+<div class="row"><span>Autó most a reptéren <span class="mu" id="tqT"></span></span><input id="tqC0" type="number" inputmode="numeric" placeholder="db" style="width:90px;margin:0;text-align:right"></div>
+<div class="row"><span>Visszaérő autó / perc</span><input id="tqR" type="number" inputmode="decimal" placeholder="3" style="width:90px;margin:0;text-align:right"></div>
+<div class="row"><span>Taxit választók aránya (%)</span><input id="tqS" type="number" inputmode="decimal" placeholder="15" style="width:90px;margin:0;text-align:right"></div>
+<div class="row"><span>Utas / autó</span><input id="tqP" type="number" inputmode="decimal" placeholder="2" style="width:90px;margin:0;text-align:right"></div>
+<div class="row"><span>Kijövetel a leszállás után (perc)</span><input id="tqD" type="number" inputmode="numeric" placeholder="20" style="width:90px;margin:0;text-align:right"></div>
+<div class="row"><span>Kijövetel szóródása (perc)</span><input id="tqX" type="number" inputmode="numeric" placeholder="12" style="width:90px;margin:0;text-align:right"></div>
+<div id="tqO" style="margin-top:8px"></div></div>
+</section>
+<div id="pk" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:31;display:flex;align-items:center;justify-content:center;padding:20px"><div class="card" style="max-width:360px;width:100%"><div id="pkT" style="font-weight:600;margin-bottom:8px"></div><div id="pkB"></div></div></div>
+<script>
+var EV=[
+{d:"2026-11-11",n:"Jodok Cello",v:"Papp László Sportaréna",cap:12500,l:"b"},
+{d:"2026-11-14",n:"AWS 20 éves jubileum",v:"Papp László Sportaréna",s:"19:00",cap:12500,l:"n"},
+{d:"2026-11-21",n:"Sarah Brightman – A Winter Symphony",v:"MVM Dome",cap:20000,l:"n"},
+{d:"2026-11-24",n:"Pitbull + Lil Jon – I’m Back!",v:"MVM Dome",s:"19:00",dur:180,dur:180,cap:20000,l:"n"},
+{d:"2026-12-01",n:"K-Pop Forever",v:"Papp László Sportaréna",s:"19:30",cap:12500,l:"b"},
+{d:"2026-12-10",n:"101 Hang – Depeche Mode show",v:"MVM Dome",cap:20000,l:"n"},
+{d:"2026-12-20",n:"José Carreras karácsonyi koncert",v:"MVM Dome",s:"19:00",cap:20000,l:"n"},
+{d:"2026-12-29",n:"Halott Pénz évzáró koncert",v:"MVM Dome",cap:20000,l:"n"},
+{d:"2027-01-30",n:"Geszti Péter – Poptimista Show",v:"MVM Dome",cap:20000,l:"n"},
+{d:"2026-11-13",d2:"2027-01-01",t:"f",n:"Advent Bazilika (karácsonyi vásár)",v:"Szent István tér",l:"n"},
+{d:"2026-11-13",d2:"2026-12-31",t:"f",n:"Vörösmarty Classic Xmas",v:"Vörösmarty tér",l:"n"},
+{d:"2026-11-27",d2:"2027-01-03",t:"f",s:"16:00",dur:60,n:"Budavári Adventi Vásár (nyitó: nov. 27.)",v:"Szentháromság tér, Mátyás-templom",l:"b"},
+{d:"2026-12-31",t:"f",n:"Ügetőszilveszter",v:"Kincsem Park",l:"n"},
+{d:"2027-08-10",d2:"2027-08-14",t:"f",n:"Sziget Fesztivál 2027",v:"Óbudai-sziget",l:"n"},
+{d:"2026-11-17",t:"s",s:"20:45",dur:120,n:"Magyarország – Észak-Írország (Nemzetek Ligája)",v:"Puskás Aréna",cap:67000,l:"n",note:"Az utolsó csoportmeccs, a feljutás a tét. A szeptemberi hazai meccsen 56 799 néző volt."},
+{d:"2026-11-26",t:"s",s:"21:00",dur:120,n:"Ferencváros – Celje (Európa-liga)",v:"Groupama Aréna",cap:23700,l:"n",note:"Az idei hazai EL-meccseken kb. 16–17 ezer néző volt."},
+{d:"2027-01-21",t:"s",s:"18:45",dur:120,n:"Ferencváros – Juventus (Európa-liga)",v:"Groupama Aréna",cap:23700,l:"n"},
+{d:"2026-11-21",d2:"2026-11-22",t:"f",n:"KidExpo (családi kiállítás)",v:"Papp László Sportaréna",l:"b",note:"130+ kiállító, napközben. Ugyanezen a hétvégén van a BabaMama Expo is (helyszín: „Budapest Aréna”, ellenőrizd)."},
+{d:"2026-11-21",s:"19:30",dur:125,n:"Klaus Mäkelä és a Royal Concertgebouw Orchestra",v:"Müpa, Bartók terem",cap:1700,l:"b",note:"Kisebb terem, de a vége egy időre sűrűsödik. Aznap este MVM Dome (Brightman) is van."},
+{d:"2026-12-07",s:"19:30",dur:150,n:"Liszt & Bartók – Anna Netrebko",v:"Müpa, Bartók terem",cap:1700,l:"n"},
+{d:"2026-12-17",s:"19:30",dur:150,n:"Nemzeti Filharmonikusok karácsonyi koncert",v:"Müpa, Bartók terem",cap:1700,l:"b"},
+{d:"2027-01-14",d2:"2027-01-16",t:"f",n:"Educatio oktatási szakkiállítás",v:"Hungexpo",l:"n",note:"A szervezők 50 000 feletti látogatót írnak a három napra."},
+{d:"2027-01-27",d2:"2027-01-30",t:"f",n:"AGROmashEXPO (agrárgép kiállítás)",v:"Hungexpo",l:"b"},
+{d:"2026-11-23",n:"Eagle-Eye Cherry",v:"Akvárium Klub",l:"b",note:"Kapunyitás 19:00. A kezdés pontos ideje nincs meg, ezért a vége sem becsülhető."},
+{d:"2026-11-13",t:"x",s:"19:00",dur:180,n:"A cirkuszhercegnő",v:"Budapesti Operettszínház",l:"b",note:"A hossz becsült (kb. 3 óra)."},
+{d:"2026-11-14",t:"x",s:"19:00",dur:180,n:"Esti előadás (a cím nincs megerősítve)",v:"Budapesti Operettszínház",l:"b",note:"A hossz becsült (kb. 3 óra)."},
+{d:"2026-11-14",t:"x",s:"19:00",dur:150,n:"Büszkeség és balítélet",v:"Vígszínház",l:"b",note:"A hossz becsült (kb. 2,5 óra)."},
+{d:"2026-11-20",t:"x",s:"19:00",dur:150,n:"A diótörő (balett)",v:"Magyar Állami Operaház",l:"b",note:"A hossz becsült (kb. 2,5 óra)."}
+];
+var L={n:"valószínűleg nagy",b:"bizonytalan",t:"teltház"};
+var DN=["vasárnap","hétfő","kedd","szerda","csütörtök","péntek","szombat"];
+try{var m=JSON.parse(localStorage.getItem("own")||"[]");EV=EV.concat(m)}catch(e){}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function pd(s){var a=s.split("-");return new Date(+a[0],a[1]-1,+a[2])}
+function endT(e){if(!e.s)return null;var a=e.s.split(":"),t=+a[0]*60+ +a[1]+(e.dur||150);t%=1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function card(e,showDate){
+var en=endT(e),td=iso(new Date()),mai=e.d<=td&&td<=(e.d2||e.d),h='<div class="card" style="position:relative">'+(mai?'<span class="mai">MAI</span>':'')+'<b>'+esc(e.n)+'</b><div class="mu">'+(showDate?pd(e.d).toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+" ("+DN[pd(e.d).getDay()]+") · ":"")+'📍 '+esc(e.v)+'</div>';
+h+='<div style="margin:6px 0">'+(e.s?"Kezdés: <b>"+e.s+"</b>":"<span class='mu'>Kezdési idő még nincs meg</span>")+'</div>';
+if(en)h+='<div class="end">Kb. vége: '+en+' · érdemes odaérni: '+endT({s:en,dur:15})+' körül</div>';
+if(e.note)h+='<div class="mu">'+e.note+'</div>';if(e.d2)h+='<div class="mu">Több napos: '+e.d.slice(5).replace("-",". ")+". – "+e.d2.slice(5).replace("-",". ")+".</div>";h+=(e.cap?'<span class="tag">kb. '+(+e.cap).toLocaleString("hu-HU")+' fő max.</span>':'<span class="tag">létszám nem ismert</span>')+'<span class="tag">'+(e.t==="f"?"fesztivál / szabadtéri":(e.t==="s"?"meccs":(e.t==="x"?"színház / opera":(e.own?"saját":"koncert / hall"))))+'</span><span class="tag">'+L[e.l||"b"]+'</span></div>';return h}
+var cur=new Date();cur.setHours(0,0,0,0);
+function draw(){
+var k=iso(cur);
+document.getElementById("dl").textContent=cur.toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+", "+DN[cur.getDay()];
+var d=EV.filter(function(e){return e.d<=k&&k<=(e.d2||e.d)});
+document.getElementById("list").innerHTML=d.length?d.map(function(e){return card(e)}).join(""):'<div class="card mu">Erre a napra nincs nagy esemény a listában.</div>';
+var n=EV.filter(function(e){return e.d>k}).sort(function(a,b){return a.d<b.d?-1:1}).slice(0,4);
+document.getElementById("next").innerHTML=n.map(function(e){return card(e,true)}).join("")}
+document.getElementById("pv").onclick=function(){cur.setDate(cur.getDate()-1);draw()};
+document.getElementById("nx").onclick=function(){cur.setDate(cur.getDate()+1);draw()};
+document.getElementById("t").onclick=function(){cur=new Date();cur.setHours(0,0,0,0);draw()};
+document.getElementById("add").onclick=function(){
+var n=fn.value.trim(),d=fd.value;if(!n||!d)return;
+var e={d:d,n:n,v:fv.value||"–",s:fs.value||undefined,cap:+fc.value||0,l:"b",own:1};
+EV.push(e);try{var m=JSON.parse(localStorage.getItem("own")||"[]");m.push(e);(window.svx?svx("own",m):localStorage.setItem("own",JSON.stringify(m)))}catch(x){}
+cur=pd(d);fn.value=fv.value=fc.value="";draw()};
+draw();
+</script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},_u=Date.now();
+function uid(){return++_u}
+function ld(k){try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}}
+var SK=["rides","fuel","ceg","fw","simst","own"],SYN={col:null,last:{},busy:false,tm:null,ready:false,need:false};
+function sts(k,t){try{localStorage.setItem("ts:"+k,t)}catch(e){}}
+function lts(k){try{return+localStorage.getItem("ts:"+k)||0}catch(e){return 0}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){return false}if(SK.indexOf(k)>=0){sts(k,Date.now());sched()}return true}
+var R=ld("rides"),F=ld("fuel"),C=ld("ceg"),FW={},off=0,RENT=85000,FEE=53000,prevV="",editId=null,editC=null,nX=0,tmr,autoPay=false;
+try{FW=JSON.parse(localStorage.getItem("fw")||"{}")}catch(e){}
+function nowIso(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function ft(n){return Math.round(n).toLocaleString("hu-HU")+" Ft"}
+function fmt(t){return t.slice(5,10).replace("-",". ")+". "+t.slice(11)}
+function toast(m,ok){var t=$("toast");t.textContent=m;t.className=ok?"ok":"no";t.style.display="block";clearTimeout(tmr);tmr=setTimeout(function(){t.style.display="none"},1800)}
+function ask(m,fn,y){$("cfm").textContent=m;$("cfY").textContent=y||"Igen, mentem";$("cf").hidden=false;$("cfY").onclick=function(){$("cf").hidden=true;fn()};$("cfN").onclick=function(){$("cf").hidden=true}}
+function pick(t,l,cb){$("pkT").textContent=t;$("pkB").innerHTML=l.map(function(n,i){return '<button data-i="'+i+'" style="width:100%;margin:4px 0">'+esc(n)+'</button>'}).join("");$("pk").hidden=false;$("pkB").onclick=function(e){var b=e.target.closest("button");if(!b)return;$("pk").hidden=true;cb(l[+b.dataset.i])}}
+function rw(a,b,c){return '<div class="row"><span>'+a+'</span><b'+(c?' style="color:'+c+'"':'')+'>'+b+'</b></div>'}
+function lab(c,d,st,hn){c=c||"";var s=(st||"")+(hn?" "+hn:"");return(c.toLowerCase()==="budapest"&&d)?d+". kerület"+(s?" "+s:""):c+(s?(c?", ":"")+s:"")}
+function key(r){return[r.c,r.d,r.st,r.hn].map(function(x){return String(x||"").toLowerCase().replace(/[.,\s]+/g,"")}).join("|")}
+function m40(b){var p=String(b).split(":"),t=((+p[0]*60+ +p[1]-40)%1440+1440)%1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")}
+function rideBy(id){return R.filter(function(r){return r.id===id})[0]}
+var RO=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI","XXII","XXIII"],KT=["Utca","Út","Köz","Tér","Körút","Sugárút","Rakpart","Sétány","Fasor","Sor","Park","Udvar","Lépcső","Híd","Dűlő","Lakótelep","Liget","Telep","Átjáró"];
+function blk(n,l){return '<div class="sub"><div class="mu"><b>'+l+'</b></div><input id="c'+n+'" placeholder="Város" value="Budapest"><select id="d'+n+'"><option value="">Kerület (nem kötelező)</option>'+RO.map(function(x){return '<option>'+x+'</option>'}).join("")+'</select><input id="s'+n+'" placeholder="Utca neve (nem kötelező)"><input type="checkbox" id="k'+n+'" hidden><div id="w'+n+'" hidden><select id="t'+n+'"><option value="">Közterület jellege (nem kötelező)</option>'+KT.map(function(x){return '<option>'+x+'</option>'}).join("")+'</select><input id="h'+n+'" placeholder="Házszám (bármit írhatsz, pl. 12/B)"></div><div id="cx'+n+'" hidden><input id="nm'+n+'" placeholder="Név (nem kötelező)"><input id="mj'+n+'" placeholder="Megjegyzés (nem kötelező)"></div></div>'}
+function sync(n){var h=$("s"+n).value.trim()!=="";$("k"+n).checked=h;$("w"+n).hidden=!h}
+function cx(){var on=$("rCo").checked;for(var i=0;i<=nX;i++)$("cx"+i).hidden=!on;$("rNm").hidden=on}
+function dist(n){$("d"+n).hidden=$("c"+n).value.trim().toLowerCase()!=="budapest"}
+function fill(i,a){$("c"+i).value=a.c||"";dist(i);var d=a.d||"";if(/^\d+$/.test(d))d=RO[+d-1]||"";$("d"+i).value=d;$("t"+i).selectedIndex=0;if(a.st){var p=a.st.split(" "),ty=p.pop(),ix=KT.map(function(x){return x.toLowerCase()}).indexOf(ty.toLowerCase());if(ix>=0&&p.length){$("s"+i).value=p.join(" ");$("t"+i).selectedIndex=ix+1}else $("s"+i).value=a.st}$("h"+i).value=a.hn||"";$("nm"+i).value=a.nm||"";$("mj"+i).value=a.mj||"";sync(i)}
+function rd(n){var nm=$("s"+n).value.trim(),on=!!nm,co=$("rCo").checked;return{c:$("c"+n).value.trim(),d:$("d"+n).hidden?"":$("d"+n).value,st:on?(nm+" "+$("t"+n).value.toLowerCase()).trim():"",hn:on?$("h"+n).value.trim():"",nm:co?$("nm"+n).value.trim():"",mj:co?$("mj"+n).value.trim():""}}
+$("rAd").innerHTML=blk(0,"Honnan (1. cím)");dist(0);
+function ev(e){var m=/^([cs])(\d+)$/.exec(e.target.id);if(m){if(m[1]==="c")dist(m[2]);else sync(m[2])}}
+$("rForm").addEventListener("input",ev);$("rForm").addEventListener("change",ev);
+$("rMore").onclick=function(){nX++;var w=document.createElement("div");w.id="x"+nX;w.innerHTML=blk(nX,(nX+1)+". cím");$("rEx").appendChild(w);dist(nX);cx();$("rLess").hidden=false};
+function less(){var w=$("x"+nX);if(w)w.remove();nX--;$("rLess").hidden=nX<1}
+$("rLess").onclick=less;
+var autoTo=false;function hv(){var on=$("rTy").value==="Előrendelés"&&$("rCo").checked,t=$("rTo");if(on&&!t.value.trim()){t.value="Reptér";autoTo=true}else if(!on&&autoTo&&t.value==="Reptér"){t.value=""}if(!on)autoTo=false}
+$("rTy").onchange=function(){var t=this.value;$("rPre").hidden=t!=="Előrendelés";$("rAir").hidden=t!=="Reptér";if(t==="Reptér")$("c0").value="Reptér";else if($("c0").value==="Reptér")$("c0").value="Budapest";dist(0);hv()};
+$("rCo").onchange=function(){if(this.checked){$("rPay").value="Klasszikus igazoló";autoPay=true}else if(autoPay){$("rPay").selectedIndex=0;autoPay=false}cx();hv()};
+function resetR(){$("rCo").checked=false;autoPay=false;autoTo=false;while(nX>0)less();$("rTy").value="";$("rTy").onchange();["rNm","rBt","rZn","rTo","rAmt","d0","s0","h0","nm0","mj0"].forEach(function(i){$(i).value=""});$("t0").selectedIndex=0;sync(0);editId=null;$("rAdd").textContent="Fuvar mentése";$("rCancel").hidden=true;$("c0").value="Budapest";dist(0);$("rPay").selectedIndex=0;cx();["rTy","rAmt","rPay","rBt"].forEach(function(i){$(i).classList.remove("bad")})}
+function loadR(r){resetR();$("rTy").value=r.ty||"";$("rTy").onchange();$("rCo").checked=!!r.co;autoPay=false;$("rPay").value=r.p;$("rAmt").value=r.a;$("rTo").value=r.to||"";$("rNm").value=r.co?"":(r.nm||"");$("rBt").value=r.bt||"";$("rZn").value=r.z||"";[{c:r.c||r.f||"",d:r.d,st:r.st,hn:r.hn,nm:r.co?r.nm:"",mj:r.mj}].concat(r.more||[]).forEach(function(a,i){if(i>0)$("rMore").onclick();fill(i,a)});cx();editId=r.id;$("rAdd").textContent="Módosítások mentése";$("rCancel").hidden=false;location.hash="";setTimeout(function(){$("rForm").scrollIntoView()},60)}
+$("rCancel").onclick=function(){resetR();toast("Módosítás elvetve",true)};
+function addrs(r){return[{c:r.c,d:r.d,st:r.st,hn:r.hn,nm:r.nm||"",mj:r.mj||""}].concat(r.more||[])}
+function resolve(o,i,cb){var A=addrs(o);if(i>=A.length)return cb();var a=A[i];if(a.nm)return resolve(o,i+1,cb);var k=key(a),es=C.filter(function(e){return e.k===k&&e.nm});if(es.length<2)return resolve(o,i+1,cb);
+pick("Melyik névre mented? "+lab(a.c,a.d,a.st,a.hn),es.map(function(e){return e.nm}),function(n){if(i===0)o.nm=n;else o.more[i-1].nm=n;resolve(o,i+1,cb)})}
+function link(o){addrs(o).forEach(function(a,i){var k=key(a),es=C.filter(function(e){return e.k===k}),e;
+if(a.nm){e=es.filter(function(x){return x.nm.toLowerCase()===a.nm.toLowerCase()})[0]||es.filter(function(x){return!x.nm})[0];if(!e){e=mk(k,a)}e.nm=a.nm}else{e=es.filter(function(x){return!x.nm})[0]||es[0];if(!e)e=mk(k,a)}
+if(a.mj)e.mj=a.mj;e.refs.push({r:o.id,i:i})});sv("ceg",C)}
+function mk(k,a){var e={id:uid(),k:k,l:lab(a.c,a.d,a.st,a.hn)||"(cím nélkül)",nm:"",mj:"",refs:[]};C.push(e);return e}
+function unlink(id){C.forEach(function(e){e.refs=e.refs.filter(function(x){return x.r!==id})});C=C.filter(function(e){return e.refs.length||e.nm||e.mj});sv("ceg",C)}
+$("rAdd").onclick=function(){
+var bad=[],ty=$("rTy").value,a=+$("rAmt").value,pay=$("rPay").value,bt=$("rBt").value,pre=ty==="Előrendelés";
+function m(id,ok){$(id).classList.toggle("bad",!ok);if(!ok)bad.push(id)}
+m("rTy",!!ty);m("rAmt",a>0);m("rPay",!!pay);if(pre)m("rBt",!!bt);else $("rBt").classList.remove("bad");
+if(bad.length){var nm={rTy:"fuvar típusa",rAmt:"fuvardíj",rPay:"fizetési mód",rBt:"előrendelés időpontja"};toast("Sikertelen mentés – hiányzik: "+bad.map(function(b){return nm[b]}).join(", "),false);return}
+var ad=[];for(var i=0;i<=nX;i++)ad.push(rd(i));var f=ad[0],co=$("rCo").checked;
+var o={id:uid(),co:co,t:nowIso(),ty:ty,a:a,p:pay,c:f.c,d:f.d,st:f.st,hn:f.hn,nm:co?f.nm:(pre?$("rNm").value.trim():""),mj:co?f.mj:"",to:$("rTo").value.trim(),more:ad.slice(1),bt:pre?bt:"",z:ty==="Reptér"?$("rZn").value:""};
+function go(){
+if(editId){ask("Biztosan menti a módosításokat?",function(){var i=R.findIndex(function(r){return r.id===editId});if(i<0){toast("Sikertelen mentés – a fuvar nem található",false);return}var old=R[i];o.id=editId;o.t=old.t;R[i]=o;if(!sv("rides",R)){R[i]=old;toast("Sikertelen mentés – a tárolás nem elérhető",false);return}unlink(editId);if(co)link(o);resetR();toast("Módosítások elmentve ✔",true);recent()});return}
+R.push(o);if(!sv("rides",R)){R.pop();toast("Sikertelen mentés – a tárolás nem elérhető",false);return}
+if(co)link(o);resetR();toast(co&&pre?"Fuvar elmentve az előrendelésekhez ✔":"Fuvar elmentve ✔",true);recent()}
+if(co)resolve(o,0,go);else go()};
+function costSave(k){var A=$(k+"A"),D=$(k+"D"),amt=+A.value;if(!(amt>0)){toast("Sikertelen mentés – add meg az összeget",false);return}
+var it={id:uid(),t:nowIso(),a:amt,k:k==="f"?"f":"o",d:D?D.value.trim():""};
+function done(){A.value="";if(D)D.value="";editC=null;$(k+"Add").textContent=k==="f"?"Tankolás mentése":"Költség mentése";$(k+"Can").hidden=true;recent()}
+if(editC&&editC.k===it.k){ask("Biztosan menti a módosítást?",function(){var i=F.findIndex(function(x){return x.id===editC.id});if(i<0)return;var old=F[i];it.id=old.id;it.t=old.t;F[i]=it;if(!sv("fuel",F)){F[i]=old;toast("Sikertelen mentés – a tárolás nem elérhető",false);return}toast("Módosítás elmentve ✔",true);done()});return}
+F.push(it);if(!sv("fuel",F)){F.pop();toast("Sikertelen mentés – a tárolás nem elérhető",false);return}var wf=0;if(k==="f"){var tdy=new Date();wf=wc(mon(tdy.getFullYear(),tdy.getMonth()+1,tdy.getDate(),0)).fuel}toast(k==="f"?"Tankolás elmentve ✔ · heti tankolás: "+ft(wf):"Költség elmentve ✔",true);done()}
+function loadC(it){var k=it.k==="o"?"o":"f";$(k+"A").value=it.a;if($(k+"D"))$(k+"D").value=it.d||"";editC={id:it.id,k:k};$(k+"Add").textContent="Módosítás mentése";$(k+"Can").hidden=false;location.hash="";setTimeout(function(){$(k+"A").scrollIntoView()},60)}
+$("fA").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();costSave("f")}});
+["f","o"].forEach(function(k){$(k+"Add").onclick=function(){costSave(k)};$(k+"Can").onclick=function(){$(k+"A").value="";if($(k+"D"))$(k+"D").value="";editC=null;$(k+"Add").textContent=k==="f"?"Tankolás mentése":"Költség mentése";this.hidden=true}});
+function reFin(){var tdy=new Date(),wf=wc(mon(tdy.getFullYear(),tdy.getMonth()+1,tdy.getDate(),0));$("fW").textContent="E heti tankolás: "+ft(wf.fuel)+" · e heti kiadás összesen: "+ft(wf.exp);
+try{if(!$("v-penzugyek").hidden)fin();if(!$("v-nap").hidden){var m=/^nap-(\d{4}-\d{2}-\d{2})$/.exec(location.hash.replace("#",""));if(m)napV(m[1])}}catch(e){}}
+function recent(){try{reFin()}catch(e){}var a=R.map(function(r){return{k:"r",r:r}}).concat(F.map(function(r){return{k:r.k==="o"?"o":"f",r:r}})).sort(function(x,y){return x.r.t<y.r.t?1:-1}).slice(0,10);
+$("recent").innerHTML=a.length?a.map(function(x){var r=x.r,s;
+if(x.k==="r")s='<a href="#dispo-'+r.id+'" style="color:inherit;text-decoration:none;flex:1">🚕 '+fmt(r.t)+" · <b>"+ft(r.a)+"</b> · "+esc(r.ty||"")+" · "+esc(r.p)+" · "+esc(lab(r.c||r.f,r.d,r.st,r.hn))+(r.to?" → "+esc(r.to):"")+(r.more&&r.more.length?" · +"+r.more.length+" cím":"")+'</a>';
+else s='<span style="flex:1">'+(x.k==="f"?"⛽ ":"🧾 ")+fmt(r.t)+" · <b>"+ft(r.a)+"</b>"+(x.k==="o"&&r.d?" · "+esc(r.d):"")+'</span>';
+return '<div class="row">'+s+(x.k==="r"?"":'<button data-k="'+x.k+'" data-a="e" data-i="'+r.id+'">✎</button>')+'<button data-k="'+x.k+'" data-i="'+r.id+'">✕</button></div>'}).join(""):'<span class="mu">Még nincs mentett adat.</span>'}
+$("recent").onclick=function(e){var b=e.target.closest("button");if(!b)return;var id=+b.dataset.i,k=b.dataset.k;
+if(b.dataset.a==="e"){loadC(F.filter(function(x){return x.id===id})[0]);return}
+ask("Biztosan törlöd?",function(){if(k==="r"){R=R.filter(function(r){return r.id!==id});sv("rides",R);unlink(id)}else{F=F.filter(function(r){return r.id!==id});sv("fuel",F)}toast("Törölve ✔",true);recent()},"Igen, törlöm")};
+function preV(){var a=R.filter(function(r){return r.co&&r.ty==="Előrendelés"}).sort(function(x,y){var kx=x.t.slice(0,10)+m40(x.bt||"00:40"),ky=y.t.slice(0,10)+m40(y.bt||"00:40");return kx<ky?1:-1});
+var c=C.slice().sort(function(x,y){return x.id<y.id?1:-1});
+$("preL").innerHTML='<h1 style="font-size:18px">📋 Előrendelések</h1>'+(a.length?a.map(function(r){return '<a class="big" href="#dispo-'+r.id+'" style="font-size:16px;flex-direction:column;align-items:flex-start;gap:2px">'+esc(lab(r.c||r.f,r.d,r.st,r.hn)||"(cím nélkül)")+'<span class="mu" style="font-weight:400">'+r.t.slice(5,10).replace("-",". ")+'. megjelenés: <b>'+(r.bt?m40(r.bt):"–")+'</b>'+(r.bt?' (előrendelés: '+esc(r.bt)+')':'')+'</span></a>'}).join(""):'<div class="card mu">Még nincs céges előrendelés.</div>')
++'<h1 style="font-size:18px;margin-top:22px">🏢 Céges címek</h1>'+(c.length?c.map(function(e){return '<a class="big" href="#cim-'+e.id+'" style="font-size:16px;flex-direction:column;align-items:flex-start;gap:2px">'+esc(e.l)+'<span class="mu" style="font-weight:400">'+(e.nm?esc(e.nm):"nincs név")+'</span></a>'}).join(""):'<div class="card mu">Még nincs mentett céges cím.</div>')}
+function cimV(id){var e=C.filter(function(x){return x.id===id})[0];if(!e)return false;var seen={},rs=e.refs.map(function(x){return rideBy(x.r)}).filter(function(r){if(!r||seen[r.id])return false;return seen[r.id]=1}).sort(function(x,y){return y.id-x.id});
+$("cimB").innerHTML='<div class="card"><div class="mu">Név</div><b>'+(esc(e.nm)||"–")+'</b><div class="mu" style="margin-top:8px">Cím</div><b>'+esc(e.l)+'</b><div class="mu" style="margin-top:8px">Átlagos fuvardíj</div><b>'+(rs.length?ft(rs.reduce(function(s,r){return s+r.a},0)/rs.length):"–")+'</b><div class="mu" style="margin-top:8px">Megjegyzés</div><b>'+(esc(e.mj)||"–")+'</b></div><h3>Dispók</h3>'+rs.map(function(r){return '<a class="big" href="#dispo-'+r.id+'" style="font-size:15px">'+fmt(r.t)+' · '+ft(r.a)+' · '+esc(r.p)+'</a>'}).join("");return true}
+function dispoV(id){var r=rideBy(id);if(!r)return false;function row(a,b){return b?'<div class="row"><span class="mu">'+a+'</span><b style="text-align:right">'+b+'</b></div>':""}
+var h=addrs(r).map(function(a,i){return row(i?(i+1)+". cím":"Honnan",esc(lab(a.c||(i?"":r.f),a.d,a.st,a.hn)))+row("Név",esc(a.nm||""))+row("Megjegyzés",esc(a.mj||""))}).join("");
+$("disB").innerHTML='<div class="card">'+row("Időpont",fmt(r.t))+row("Típus",esc(r.ty||"–")+(r.co?" (céges)":""))+row("Fuvardíj",ft(r.a))+row("Fizetés",esc(r.p))+h+row("Hova",esc(r.to||""))+row("Előrendelés időpontja",esc(r.bt||""))+row("Megjelenés (−40 perc)",r.bt?m40(r.bt):"")+row("Zónakód",esc(String(r.z||"")))+'</div><button class="p" data-e="'+r.id+'" style="width:100%">✎ Dispó szerkesztése</button><button data-x="'+r.id+'" style="width:100%;margin-top:8px;color:#c0392b">🗑 Dispó törlése</button>';return true}
+$("disB").onclick=function(e){var b=e.target.closest("button");if(!b)return;if(b.dataset.e)loadR(rideBy(+b.dataset.e));if(b.dataset.x){var id=+b.dataset.x;ask("Biztosan törlöd ezt a dispót?",function(){R=R.filter(function(r){return r.id!==id});sv("rides",R);unlink(id);toast("Dispó törölve ✔",true);recent();if(history.length>1)history.back();else location.hash=""},"Igen, törlöm")}};
+$("disBack").onclick=function(e){if(history.length>1){e.preventDefault();history.back()}};
+var PM=["Készpénz","Kártya","Klasszikus igazoló","8jegyű igazoló","Taxi kártya","Taxi app","Mobilkód","Revolut"],IMM=["Készpénz","Revolut","Klasszikus igazoló"],DN2=["Hétfő","Kedd","Szerda","Csütörtök","Péntek","Szombat","Vasárnap"];
+function sm(a,t){return a.filter(function(x){return!t||x.p===t}).reduce(function(z,x){return z+x.a},0)}
+function mon(y,m,d,add){var x=new Date(y,m-1,d+add);x.setDate(x.getDate()-((x.getDay()+6)%7));return iso(x)}
+function sw(r){var y=+r.t.slice(0,4),m=+r.t.slice(5,7),d=+r.t.slice(8,10),sun=new Date(y,m-1,d).getDay()===0;if(IMM.indexOf(r.p)>=0)return mon(y,m,d,0);if(r.p==="Kártya")return mon(y,m,d,sun&&r.t.slice(11)>="21:30"?1:0);return mon(y,m,d,1)}
+function wc(k){var e=new Date(k+"T00:00");e.setDate(e.getDate()+7);var s=k+"T00:00",n=iso(e)+"T00:00",r=R.filter(function(x){return sw(x)===k}),fs=F.filter(function(x){return x.t>=s&&x.t<n}),
+ps=PM.map(function(m){return sm(r,m)}),inc=sm(r),imm=ps[0]+ps[7],card=ps[1],app=inc-imm-card,fuel=sm(fs.filter(function(x){return x.k!=="o"}).map(function(x){return{a:x.a}})),oth=sm(fs.filter(function(x){return x.k==="o"}).map(function(x){return{a:x.a}})),w=FW[k]||{},lead=+w.l||0,fixed=RENT+FEE+lead,exp=fixed+fuel+oth;
+return{r:r,ps:ps,inc:inc,imm:imm,card:card,app:app,fuel:fuel,oth:oth,nf:fs.filter(function(x){return x.k!=="o"}).length,no:fs.filter(function(x){return x.k==="o"}).length,lead:lead,fixed:fixed,exp:exp,profit:inc-exp,tr:card+app-fixed,w:w}}
+var G="#1f8a4c",RD="#c0392b";
+function dp(day,W){var rs=R.filter(function(x){return x.t.slice(0,10)===day}),fs=F.filter(function(x){return x.t.slice(0,10)===day});return sm(rs)-W.fixed/7-sm(fs.map(function(x){return{a:x.a}}))}
+function fin(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+7*off);var k=iso(d),W=wc(k),e6=new Date(d);e6.setDate(e6.getDate()+6);
+var days=DN2.map(function(n,i){var dd=new Date(d);dd.setDate(d.getDate()+i);var id=iso(dd),pl=id<=iso(new Date())?dp(id,W):null;return '<a class="big" href="#nap-'+id+'" style="font-size:16px;justify-content:space-between"><span>'+n+' · '+dd.toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+'</span>'+(pl===null?"":'<span style="color:'+(pl>=0?G:RD)+'">'+ft(pl)+'</span>')+'</a>'}).join("");
+$("fin").innerHTML='<div class="card" style="display:flex;align-items:center;gap:8px"><button data-w="-1">‹</button><div class="day" style="flex:1">'+(off===0?"Aktuális hét":"Korábbi hét")+'<div class="mu" style="font-weight:400">'+d.toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric"})+' – '+e6.toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+'</div></div><button data-w="1"'+(off>=0?' disabled':'')+'>›</button></div>'
++'<div class="mu">Elszámolás: készpénz, Revolut, klasszikus igazoló az aktuális hétbe; kártya vasárnap 21:30-ig; a többi mód +1 nap (a vasárnapi már a következő hétre számít). Az utalásba minden jön, ami nem készpénz vagy Revolut.</div>'
++'<h3>Bevételek ('+W.r.length+' fuvar)</h3><div class="card">'+PM.map(function(m,i){return rw(m,ft(W.ps[i]))}).join("")+rw("Összesen",ft(W.inc))+'</div>'
++'<h3>Kiadások</h3><div class="card">'+rw("Autóbérlés",ft(RENT))+rw("Tagdíj",ft(FEE))+rw("Tankolás ("+W.nf+" db)",ft(W.fuel))+'<div class="row"><span>Leadó <span class="mu">(kézzel)</span></span><input data-f="l" data-k="'+k+'" type="number" inputmode="numeric" placeholder="0" value="'+(W.w.l||"")+'" style="width:120px;margin:0;text-align:right"></div>'+rw("Egyéb költségek ("+W.no+" db)",ft(W.oth))+rw("Összesen",ft(W.exp))+'</div>'
++'<h3>Heti profit and loss</h3><div class="card">'+rw("Bevétel",ft(W.inc))+rw("Kiadás","– "+ft(W.exp))+'<div class="mu" style="margin-top:8px">'+(W.profit>=0?"Profit":"Veszteség")+'</div><div class="num" style="color:'+(W.profit>=0?G:RD)+'">'+ft(W.profit)+'</div></div>'
++'<h3>Utalás (a következő hét szerdáján érkezik)</h3><div class="card">'+rw("Kártya",ft(W.card))+rw("Készpénzkímélő eszközök",ft(W.app))+rw("– Autóbérlés",ft(RENT))+rw("– Tagdíj",ft(FEE))+rw("– Leadó",ft(W.lead))+'<div class="num" style="color:'+(W.tr>=0?G:RD)+'">'+ft(W.tr)+'</div></div>'
++'<h3>Napi kötelező költség (7 nap)</h3><div class="card"><div class="num">'+ft(W.fixed/7)+' / nap</div><div class="mu">Autóbérlés + tagdíj + leadó. Az összes kiadással: '+ft(W.exp/7)+' / nap.</div></div>'
++'<h3>Napok</h3>'+days}
+$("fin").onchange=function(e){var t=e.target;if(!t.dataset.f)return;var k=t.dataset.k;FW[k]=FW[k]||{};FW[k][t.dataset.f]=+t.value||0;var ok=sv("fw",FW);toast(ok?"Mentve ✔":"Sikertelen mentés",ok);fin()};
+$("fin").onclick=function(e){var b=e.target.closest("button");if(!b||!b.dataset.w)return;off+=+b.dataset.w;fin()};
+function costBlock(fs){if(!fs.length)return"";fs=fs.slice().sort(function(a,b){return a.t<b.t?1:-1});return '<h3>Tankolás és költségek</h3><div class="card">'+fs.map(function(x){var o=x.k==="o",k=o?"o":"f";return '<div class="row"><span>'+x.t.slice(11)+' · '+(o?'🧾 '+esc(x.d||"Egyéb költség"):'⛽ Tankolás')+' · <b>'+ft(x.a)+'</b></span><span><button data-k="'+k+'" data-a="e" data-i="'+x.id+'">✎</button> <button data-k="'+k+'" data-i="'+x.id+'">✕</button></span></div>'}).join("")+'</div>'}
+function napV(day){var m=/^(\d+)-(\d+)-(\d+)$/.exec(day);if(!m)return false;var y=+m[1],mo=+m[2],dd=+m[3],k=mon(y,mo,dd,0),t=new Date(),k0=mon(t.getFullYear(),t.getMonth()+1,t.getDate(),0),dow=(new Date(y,mo-1,dd).getDay()+6)%7;
+off=Math.round((new Date(k+"T00:00")-new Date(k0+"T00:00"))/6048e5);
+var rs=R.filter(function(x){return x.t.slice(0,10)===day}).sort(function(a,b){return b.t<a.t?-1:1}),fs=F.filter(function(x){return x.t.slice(0,10)===day}),
+fuel=sm(fs.filter(function(x){return x.k!=="o"}).map(function(x){return{a:x.a}})),oth=sm(fs.filter(function(x){return x.k==="o"}).map(function(x){return{a:x.a}})),inc=sm(rs),W=wc(k),avgD=W.fixed/7,exp=avgD+fuel+oth,profit=inc-exp,b="";
+if(dow<=1)b='<div class="card" style="background:var(--hi);border-color:var(--ac);font-weight:700">⚠️ Leadó kitöltése/ellenőrzése!</div>';
+if(dow===2)b='<div class="card" style="background:var(--hi);border-color:var(--ac);font-weight:700">💶 Utalásos fizetés (múlt heti):<div class="num">'+ft(wc(mon(y,mo,dd,-7)).tr)+'</div></div>';
+var other=rs.filter(function(x){return PM.indexOf(x.p)<0});
+$("napB").innerHTML=b+'<h1 style="font-size:18px">'+DN2[dow]+' · '+new Date(y,mo-1,dd).toLocaleDateString("hu-HU",{month:"long",day:"numeric"})+'</h1>'
++'<h3>Bevételek ('+rs.length+' fuvar)</h3><div class="card">'+PM.map(function(p){return[p,sm(rs,p)]}).filter(function(x){return x[1]}).map(function(x){return rw(x[0],ft(x[1]))}).join("")+(other.length?rw("Egyéb mód",ft(sm(other))):"")+rw("Összesen",ft(inc))+'</div>'
++'<h3>Kiadások</h3><div class="card">'+rw("Napi átlag (bérlés + tagdíj + leadó)/7",ft(avgD))+rw("Tankolás",ft(fuel))+rw("Egyéb költségek",ft(oth))+rw("Összesen",ft(exp))+'</div>'
++'<h3>Napi profit and loss</h3><div class="card"><div class="mu">'+(profit>=0?"Profit":"Veszteség")+'</div><div class="num" style="color:'+(profit>=0?G:RD)+'">'+ft(profit)+'</div></div>'
++'<h3>Dispók</h3>'+(rs.length?rs.map(function(r){return '<a class="big" href="#dispo-'+r.id+'" style="font-size:15px;flex-direction:column;align-items:flex-start;gap:2px">'+r.t.slice(11)+' · '+ft(r.a)+' · '+esc(r.p)+'<span class="mu" style="font-weight:400">'+esc(lab(r.c||r.f,r.d,r.st,r.hn))+(r.to?" → "+esc(r.to):"")+'</span></a>'}).join(""):'<div class="card mu">Erre a napra nincs fuvar.</div>')+costBlock(fs);return true}
+var CLD=["2026-12-23","2026-12-24","2026-12-25","2026-12-26","2026-12-31"],NH="Nyitvatartás nincs megerősítve, eseményenként változik.";
+var SZ=[
+{id:"puskas",n:"Puskás Aréna",t:"k",a:"Istvánmezei út 3–5., XIV. ker.",cap:"kb. 60 000–65 000 fő",h:null,i:"Nagy stadion koncertekre és meccsekre. Novemberre–decemberre koncertet nem találtam."},
+{id:"park",n:"Budapest Park",t:"k",a:"Soroksári út 60., IX. ker.",cap:"nincs megerősítve",h:null,i:"Szabadtéri helyszín, a 2026-os (15.) szezon áprilisban indult. Télen nincs program, tavasszal újra érdemes nézni."},
+{id:"mvm",n:"MVM Dome",t:"k",a:"cím nincs megerősítve",cap:"kb. 20 000 fő",cn:20000,h:null,i:"Nagy fedett aréna. Az ismert koncertek közül kettő 19:00-kor kezdődik."},
+{id:"papp",n:"Papp László Sportaréna",t:"k",a:"Stefánia út 2., XIV. ker.",cap:"kb. 12 500 fő",cn:12500,h:null,i:"Javaslat: a koncertek mellett meccsek és expók is vannak itt.",s:1},
+{id:"akv",n:"Akvárium Klub",t:"k",a:"Erzsébet tér 12., V. ker.",cap:"nincs megerősítve",h:null,i:"Javaslat: belvárosi klub és koncertterem. Az ismert koncert kapunyitása 19:00.",s:1},
+{id:"a38",n:"A38 hajó",t:"k",a:"Petőfi híd, budai hídfő, XI. ker.",cap:"nincs megerősítve",h:null,i:"Javaslat: hajó koncertteremmel és bisztróval. A szombati klubest 23:00-kor indul.",s:1},
+{id:"arz",n:"Arzenál",t:"b",a:"Soroksári út 158/C, IX. ker.",cap:"kb. 1 580 fő",h:null,i:"Techno és elektronikus zene. 18+, fényképes igazolvány kell. A jegyet karszalagra cserélik."},
+{id:"remix",n:"Remix",t:"b",a:"nincs megerősítve",cap:"nincs adat",h:null,i:"Nem találtam megbízható adatot. Ha tudod a címet és a nyitvatartást, szólj."},
+{id:"morr",n:"Morrison’s 2",t:"b",a:"Szent István krt. 11., V. ker. (Nyugati)",cap:"7 szint, több táncparkett",h:["18:00–05:00","18:00–05:00","18:00–05:00","18:00–05:00","18:00–05:00","18:00–05:00",""],i:"Hétfő–szombat. Egy forrás szerint csak szerda–szombat. Hétköznap többnyire ingyenes, hétvégén 1 000–1 500 Ft. Jegyes estéken csak az aznapi jeggyel engednek be."},
+{id:"rom",n:"Romkert",t:"b",a:"Döbrentei tér 9., I. ker.",cap:"nincs adat",h:["","23:00–05:00","23:00–05:00","23:00–05:00","23:00–05:00","23:00–05:00",""],i:"Kedd–szombat. Nyári szezonos klub lehet, a téli nyitvatartást ellenőrizd. Tel.: +36 30 591 4450."},
+{id:"ot",n:"Ötkert",t:"b",a:"Zrínyi utca 4., V. ker.",cap:"nincs adat",h:null,i:"House zene, 19. századi épület visszahúzható tetővel, 2010 óta működik."},
+{id:"sym",n:"Symbol",t:"b",a:"Bécsi út 56., III. ker.",cap:"500–1 200 fő",h:["","","","","","22:00–04:00",""],i:"Egy forrás szerint csak szombaton nyit."},
+{id:"bra",n:"Brandus",t:"b",a:"nincs megerősítve",cap:"nincs adat",h:null,i:"Nem találtam megbízható adatot. Ha tudod a címet és a nyitvatartást, szólj."},
+{id:"cin",n:"Cinema Hall",t:"b",a:"Hajógyári-sziget, III. ker.",cap:"nincs adat",h:null,i:"Az Óbuda Bay mellett működik. A nappali Óbuda Bay megnyitóján a két helyszín 13:00-tól másnap 06:00-ig tartott."},
+{id:"inst",n:"Instant-Fogas",t:"b",a:"Akácfa utca 49–51., VII. ker.",cap:"7 klub egy címen",h:["18:00–06:00","18:00–06:00","18:00–06:00","18:00–06:00","18:00–06:00","18:00–06:00","18:00–06:00"],i:"Többnyire ingyenes, különleges estéken a termek jegyesek. Tel.: +36 70 638 5040, instant-fogas.com."},
+{id:"fuge",n:"Füge Udvar",t:"b",a:"Klauzál utca 19–21., VII. ker.",cap:"nincs adat",h:null,i:"Romkocsma. Tel.: +36 20 200 1000. Nyitvatartást nem találtam."},
+{id:"turb",n:"Turbina",t:"b",a:"Vajdahunyad utca 4., VIII. ker.",cap:"nincs adat",h:null,i:"Művészeti és közösségi tér, techno klubként is szerepel. Tel.: +36 30 501 6410."},
+{id:"obay",n:"Óbuda Bay",t:"b",a:"Hajógyári-sziget (Hajógyár utca 18386/9), III. ker.",cap:"nincs adat",h:null,i:"Magyarország első nappali (daytime) rendezvényhelye, 2025. szeptember 27-én nyitott."},
+{id:"barba",n:"Barba Negra",t:"b",a:"Szállító utca 3., XXI. ker. (Csepel)",cap:"Red Stage 3 300 fő, Blue Stage 850 fő",cn:3300,h:null,i:"Koncert- és klubhelyszín. A jegyiroda hétköznap 12:00–18:00, hétvégén és esemény napján 16:00-tól. Tel.: +36 20 563 2254."},
+{id:"durer",n:"Dürer Kert",t:"b",a:"Öböl utca 1., XI. ker.",cap:"nagyterem 950, kis terem 270 fő",h:["16:00–00:00","16:00–00:00","16:00–00:00","16:00–00:00","15:00–02:00","12:00–04:00","12:00–23:00"],i:"Koncertek és kert. 23:00 után csak 18 év felettiek. Az idők szezonálisan és eseményenként változhatnak."},
+{id:"grund",n:"Grund",t:"b",a:"nincs megerősítve",cap:"nincs adat",h:null,i:"Nem találtam megbízható adatot. Ha tudod a címet és a nyitvatartást, szólj."},
+{id:"szimpla",n:"Szimpla Kert",t:"b",a:"Kazinczy utca 14., VII. ker.",cap:"nincs adat",h:["15:00–04:00","15:00–04:00","15:00–04:00","15:00–04:00","15:00–04:00","12:00–04:00","09:00–04:00"],cl:CLD,i:"Ingyenes belépés. Egy forrás szerint december 23–26. és 31. között zárva."}];
+var SE=[
+{v:"mvm",d:"2026-11-21",n:"Sarah Brightman – A Winter Symphony"},
+{v:"mvm",d:"2026-11-24",n:"Pitbull + Lil Jon",s:"19:00",dur:180},
+{v:"mvm",d:"2026-12-10",n:"101 Hang – Depeche Mode show"},
+{v:"mvm",d:"2026-12-20",n:"José Carreras karácsonyi koncert",s:"19:00"},
+{v:"mvm",d:"2026-12-29",n:"Halott Pénz évzáró koncert"},
+{v:"mvm",d:"2027-01-30",n:"Geszti Péter – Poptimista Show"},
+{v:"papp",d:"2026-11-14",n:"AWS 20 éves jubileum"},
+{v:"papp",d:"2026-12-01",n:"K-Pop Forever",s:"19:30"},
+{v:"akv",d:"2026-11-23",n:"Eagle-Eye Cherry",s:"19:00",dr:1}];
+var szd=new Date();szd.setHours(0,0,0,0);
+function vn(id){return SZ.filter(function(v){return v.id===id})[0]}
+function tmm(b,d){var p=b.split(":"),t=((+p[0]*60+ +p[1]+d)%1440+1440)%1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")}
+function evRow(e,dt){var v=vn(e.v),en=e.s&&!e.dr?endT(e):null;return '<div class="card"><b>'+esc(e.n)+'</b><div class="mu">'+(dt?e.d.slice(5).replace("-",". ")+". · ":"")+'📍 '+esc(v.n)+(e.s?' · '+(e.dr?'kapunyitás':'kezdés')+': <b>'+e.s+'</b>':'')+(v.cn?' · kb. '+v.cn.toLocaleString("hu-HU")+' fő max.':'')+'</div>'+(en?'<div class="end">Kb. vége: '+en+' · érdemes odaérni: '+tmm(en,15)+' körül</div>':'<div class="mu" style="margin-top:4px">'+(e.dr?'A kezdés pontos ideje nincs meg, ezért a vége sem becsülhető.':'Kezdési idő nincs meg, ezért a vége sem becsülhető.')+'</div>')+'</div>'}
+function vb(v){return '<a class="big" href="#hely-'+v.id+'" style="font-size:16px;flex-direction:column;align-items:flex-start;gap:2px">'+esc(v.n)+'<span class="mu" style="font-weight:400">'+esc(v.a)+'</span></a>'}
+function szV(){var day=iso(szd),dow=(szd.getDay()+6)%7,ev=SE.filter(function(e){return e.d===day}),nx=SE.filter(function(e){return e.d>day}).sort(function(a,b){return a.d<b.d?-1:1}).slice(0,4),op=[],cl=[],un=[];
+SZ.forEach(function(v){if(v.cl&&v.cl.indexOf(day)>=0)cl.push(v.n+" (ünnepi zárva)");else if(!v.h)un.push(v.n);else if(v.h[dow])op.push(rw(esc(v.n),v.h[dow]));else cl.push(v.n)});
+$("szB").innerHTML='<div class="card" style="display:flex;align-items:center;gap:8px"><button data-s="-1">‹</button><div class="day" style="flex:1">'+DN2[dow]+'<div class="mu" style="font-weight:400">'+szd.toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric"})+'</div></div><button data-s="1">›</button></div><button data-s="0" style="width:100%">Ma</button>'
++'<h3>Koncertek és események</h3>'+(ev.length?ev.map(function(e){return evRow(e)}).join(""):'<div class="card mu">Erre a napra nincs ismert esemény.</div>')
++'<h3>Nyitva ezen a napon</h3><div class="card">'+(op.join("")||'<span class="mu">Nincs megerősített nyitvatartás.</span>')+'</div>'
++(cl.length?'<div class="mu" style="margin-top:6px">Zárva: '+cl.map(esc).join(", ")+'</div>':'')
++(un.length?'<div class="mu" style="margin-top:6px">Nyitvatartás nincs megerősítve: '+un.map(esc).join(", ")+'</div>':'')
++'<h3>Közelgő nagy bulik és koncertek</h3>'+(nx.length?nx.map(function(e){return evRow(e,1)}).join(""):'<div class="card mu">Nincs ismert közelgő esemény.</div>')+'<h3>Koncerthelyek</h3>'+SZ.filter(function(v){return v.t==="k"}).map(vb).join("")+'<h3>Bulihelyek</h3>'+SZ.filter(function(v){return v.t==="b"}).map(vb).join("")
++'<p class="mu">A buli-programokat (DJ-k, jegyes esték) még nem találtam meg, ezek nincsenek benne. A „javaslat” helyeket én tettem hozzá.</p>'}
+$("szB").onclick=function(e){var b=e.target.closest("button");if(!b||b.dataset.s===undefined)return;var s=+b.dataset.s;if(s===0){szd=new Date();szd.setHours(0,0,0,0)}else szd.setDate(szd.getDate()+s);szV()};
+function helV(id){var v=vn(id);if(!v)return false;var ev=SE.filter(function(e){return e.v===id}).sort(function(a,b){return a.d<b.d?-1:1});
+$("hlB").innerHTML='<h1 style="font-size:18px">'+esc(v.n)+(v.s?' <span class="mu" style="font-weight:400">(javaslat)</span>':'')+'</h1><div class="card"><div class="mu">Típus</div><b>'+(v.t==="k"?"Koncerthely":"Bulihely")+'</b><div class="mu" style="margin-top:8px">Cím</div><b>'+esc(v.a)+'</b><div class="mu" style="margin-top:8px">Kapacitás</div><b>'+esc(v.cap)+'</b></div>'
++'<h3>Nyitvatartás</h3><div class="card">'+(v.h?DN2.map(function(n,i){return rw(n,v.h[i]||"zárva")}).join(""):'<span class="mu">'+NH+'</span>')+'</div>'
++'<h3>Információk</h3><div class="card">'+esc(v.i)+'</div>'
++'<h3>Események</h3>'+(ev.length?ev.map(function(e){return evRow(e,1)}).join(""):'<div class="card mu">Nem találtam ismert eseményt.</div>');return true}
+var SS={},sOrd=[],sQ=null,sInt=null,sSt=0;
+try{SS=JSON.parse(localStorage.getItem("simst")||"{}")}catch(e){SS={}}
+var WD=["","egy","kettő","három","négy","öt","hat","hét","nyolc","kilenc","tíz","tizenegy","tizenkettő","tizenhárom","tizennégy","tizenöt","tizenhat","tizenhét","tizennyolc","tizenkilenc","húsz"],SST=["Béke","Kisfaludy","Jázmin","Bakfű","Szárnyas","Dózsa György","Építész","Váci","Fehérvári","Ráday","Hajós","Kossuth Lajos","Petőfi Sándor","Arany János","Tóth Kálmán","Mester","Bartók Béla","Üllői"],SCT=["Maglód","Gyömrő","Vecsés","Dunakeszi","Budaörs","Érd","Szigetszentmiklós"];
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a}
+function sAddr(){var st=SST[rnd(0,SST.length-1)]+" utca",a=rnd(1,40),b=a+rnd(2,20),r=rnd(1,4),k=RO[rnd(0,22)];if(r===1)return k+" Kerület, "+st+" "+a+"-"+b;if(r===2)return k+". Kerület Budapest "+st+" "+a+"-"+b;if(r===3)return k+". kerület Budapest "+st+" "+a+"-"+b+"b";return SCT[rnd(0,SCT.length-1)]+", "+st+" "+a+"-"+b}
+function sTime(){var d=new Date(Date.now()+rnd(20,240)*6e4);d.setMinutes(Math.round(d.getMinutes()/5)*5);function z(x){return("0"+x).slice(-2)}return z(d.getMonth()+1)+"-"+z(d.getDate())+" "+z(d.getHours())+":"+z(d.getMinutes())}
+function sNew(){sOrd=[];for(var i=0,n=(function(){var r=Math.random();return r<.7?0:r<.9?1:rnd(7,12)})();i<n;i++)sOrd.push({a:sAddr(),t:sTime(),x:Math.random()<.5,ok:Math.random()>.2});sOrd.sort(function(x,y){return x.t<y.t?-1:1});if(sOrd.length&&!sOrd.some(function(x){return x.ok}))sOrd[0].ok=true;$("sMd").hidden=true;sDraw()}
+function sDraw(){$("sList").innerHTML=sOrd.map(function(o,i){return '<div class="zAd">'+esc(o.a)+'</div><div class="zR"><span>'+(o.x?"Extra ⓘ":"")+'</span><span>'+o.t+'</span><button class="zC'+(o.ok?"":" zN")+'" data-i="'+i+'">'+(o.ok?"✔":"⊘")+'</button></div>'}).join("")}
+function mkQ(){if(Math.random()<.5){var s=[],big=Math.random()<.5;while(s.length<3){var n=rnd(1,20);if(s.indexOf(n)<0)s.push(n)}return{t:"Melyik a "+(big?"legnagyobb":"legkisebb")+": "+s.map(function(n){return WD[n]}).join(", ")+"?",o:shuf(s.slice()),c:big?Math.max.apply(null,s):Math.min.apply(null,s)}}
+var a=rnd(1,19),b=rnd(1,20-a),c=a+b,o=[c];while(o.length<3){var d=c+rnd(-3,3);if(d>=1&&d<=20&&o.indexOf(d)<0)o.push(d)}
+return{t:"Mennyi "+(Math.random()<.5?WD[a]+" plusz "+b:a+" plusz "+WD[b])+"?",o:shuf(o),c:c}}
+function sAsk(i){var q=mkQ();sQ={i:i,q:q,t0:performance.now()};
+$("sMd").innerHTML='<div class="zQ">Biztosan elvállalja?<br>'+esc(sOrd[i].a)+'<br>Az elvállaláshoz válaszolja meg az alábbi kérdést:<br>'+esc(q.t)+'</div><div class="zB">'+q.o.map(function(n){return '<button data-a="'+n+'">'+n+'</button>'}).join("")+'<button data-a="x" class="zX">Mégse</button></div>';$("sMd").hidden=false}
+function rec(ms,ok){var d=iso(new Date()),s=SS.d=SS.d||{},r=s[d]||(s[d]=[0,0,0]);r[0]++;r[1]+=ms;if(ok)r[2]++;if(ok&&(!SS.b||ms<SS.b))SS.b=Math.round(ms);var ks=Object.keys(s).sort();while(ks.length>60)delete s[ks.shift()];sv("simst",SS)}
+function sec(ms){return(ms/1000).toFixed(1).replace(".",",")+" mp"}
+function sStat(){var d=SS.d||{},ks=Object.keys(d).sort(),n=0,s=0,ok=0;ks.forEach(function(k){n+=d[k][0];s+=d[k][1];ok+=d[k][2]});
+var pts=ks.slice(-14).map(function(k){return{k:k,v:d[k][1]/d[k][0]/1000}}),h=n?rw("Megoldott feladat",n)+rw("Helyes válasz",Math.round(ok/n*100)+"%")+rw("Átlagidő",sec(s/n))+rw("Legjobb helyes idő",SS.b?sec(SS.b):"–"):'<span class="mu">Még nincs adat. Gyakorolj, és itt megjelenik az átlagidőd.</span>';
+if(pts.length){var W=300,H=130,L=30,mx=Math.max.apply(null,pts.map(function(p){return p.v}))*1.2||1,X=function(i){return pts.length>1?L+i*(W-L-12)/(pts.length-1):(W+L)/2},Y=function(v){return H-22-v/mx*(H-36)};
+h+='<div class="mu" style="margin-top:10px">Napi átlagidő (mp)</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto"><line x1="'+L+'" y1="'+(H-22)+'" x2="'+(W-6)+'" y2="'+(H-22)+'" style="stroke:var(--bd)"/><text x="2" y="14" font-size="10" style="fill:var(--mu)">'+mx.toFixed(1)+'</text><text x="2" y="'+(H-24)+'" font-size="10" style="fill:var(--mu)">0</text>'
++(pts.length>1?'<polyline fill="none" stroke-width="2" style="stroke:var(--ac)" points="'+pts.map(function(p,i){return X(i)+","+Y(p.v)}).join(" ")+'"/>':"")
++pts.map(function(p,i){return '<circle cx="'+X(i)+'" cy="'+Y(p.v)+'" r="3.5" style="fill:var(--ac)"/><text x="'+X(i)+'" y="'+(Y(p.v)-7)+'" font-size="9" text-anchor="middle" style="fill:var(--tx)">'+p.v.toFixed(1)+'</text>'}).join("")
++'<text x="'+X(0)+'" y="'+(H-8)+'" font-size="9" text-anchor="middle" style="fill:var(--mu)">'+pts[0].k.slice(5)+'</text>'+(pts.length>1?'<text x="'+X(pts.length-1)+'" y="'+(H-8)+'" font-size="9" text-anchor="middle" style="fill:var(--mu)">'+pts[pts.length-1].k.slice(5)+'</text>':"")+'</svg>'}
+$("sSt").innerHTML=h}
+function sTick(){if($("v-szimulacio").hidden){clearInterval(sInt);return}var s=Math.floor((Date.now()-sSt)/1000);$("sTm").textContent=[Math.floor(s/3600),Math.floor(s/60)%60,s%60].map(function(x){return("0"+x).slice(-2)}).join(":")}
+var sSc=parseFloat((function(){try{return localStorage.getItem("simsc2")}catch(e){return null}})())||1;
+function sApply(){$("v-szimulacio").style.setProperty("--s",sSc);sHide()}
+var sHd=(function(){try{return localStorage.getItem("simhd")==="1"}catch(e){return false}})();
+function sHide(){document.querySelector(".zP").classList.toggle("zh",sHd)}
+function sZoom(d){sSc=Math.min(1.1,Math.max(.6,Math.round((sSc+d)*100)/100));try{localStorage.setItem("simsc2",sSc)}catch(e){}sApply();toast("Méret: "+Math.round(sSc*100)+"%",true)}
+$("zMi").onclick=function(){sZoom(-.05)};$("zPl").onclick=function(){sZoom(.05)};
+$("zHd").onclick=function(){sHd=!sHd;try{localStorage.setItem("simhd",sHd?"1":"0")}catch(e){}sHide();toast(sHd?"Fejléc elrejtve":"Fejléc látható",true)};
+$("zFs").onclick=function(){var el=$("v-szimulacio"),f=function(){toast("A teljes képernyő itt nem engedélyezett",false)};try{var r=el.requestFullscreen&&el.requestFullscreen();if(r&&r.catch)r.catch(f);else if(!r)f()}catch(e){f()}};
+function simV(){sApply();sSt=Date.now();clearInterval(sInt);sInt=setInterval(sTick,1000);sTick();sOrd=[];sQ=null;$("sMd").hidden=true;$("sRes").style.display="none";sDraw();sStat()}
+$("sRef").onclick=sNew;
+$("sList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var i=+b.dataset.i,o=sOrd[i];if(!o)return;if(!o.ok){toast("Ez az előrendelés most nem elérhető",false);return}sAsk(i)};
+$("sMd").onclick=function(e){var b=e.target.closest("button");if(!b||!sQ)return;var a=b.dataset.a;if(a==="x"){$("sMd").hidden=true;sQ=null;return}
+var ms=performance.now()-sQ.t0,ok=+a===sQ.q.c,i=sQ.i,c=sQ.q.c;sQ=null;$("sMd").hidden=true;rec(ms,ok);var r=$("sRes");r.style.display="block";r.style.background=ok?"#1f8a4c":"#c0392b";r.textContent=ok?"✔ Helyes · "+sec(ms):"✘ Hibás · "+sec(ms)+" · a helyes válasz: "+c;if(ok)sOrd.splice(i,1);sDraw();sStat();clearTimeout(window._sr);window._sr=setTimeout(function(){r.style.display="none"},2500)};
+$("sRst").onclick=function(){ask("Biztosan törlöd a statisztikát?",function(){SS={};sv("simst",SS);sStat();toast("Statisztika törölve ✔",true)},"Igen, törlöm")};
+function z2(n){return("0"+n).slice(-2)}
+function mm(t){t=((t%1440)+1440)%1440;return z2(Math.floor(t/60))+":"+z2(t%60)}
+function nowE(d){var a=new Date(d.at),n=new Date();if(isNaN(a))return-1;var m0=new Date(a.getFullYear(),a.getMonth(),a.getDate()),n0=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((n0-m0)/864e5)*1440+n.getHours()*60+n.getMinutes()}
+function peakHtml(d){var fl=[],b0=parseInt((d.hours&&d.hours[0]&&d.hours[0].h)||"0")*60;(d.hours||[]).forEach(function(x){(x.items||[]).forEach(function(s){var m=/^(\d{2}):(\d{2})\s+(.*)$/.exec(s);if(!m)return;var l=+m[1]*60+ +m[2];if(l<b0)l+=1440;var px=/kb\.\s*(\d+)\s*fő/.exec(m[3]);fl.push({l:l,e:l+20,p:px?+px[1]:0,c:m[3].replace(/\s*·.*$/,"").replace(/\s*\([^)]*\)/g,"").replace(/\*/g,"").trim()})})});
+fl.sort(function(a,b){return a.e-b.e});var cand=[],i,j,k;
+for(i=0;i<fl.length;i++){j=i;while(j<fl.length&&fl[j].e<fl[i].e+10)j++;if(j-i>=3)cand.push({i:i,j:j,c:j-i})}
+cand.sort(function(a,b){return b.c-a.c||a.i-b.i});var used={},res=[];
+cand.forEach(function(w){for(k=w.i;k<w.j;k++)if(used[k])return;for(k=w.i;k<w.j;k++)used[k]=1;res.push(w)});
+res.sort(function(a,b){return a.i-b.i});
+var nowM=nowE(d);
+var h='<h3>Mikor érdemes odaérni?</h3><div class="mu" style="margin-bottom:6px">Leszállás + 20 perc = kijönnek a taxikhoz. 10 percen belül: <b style="color:#e08a00">narancs</b> 3–4 gép, <b style="color:#b71c1c">vörös</b> 5–6 gép, <b style="color:#ff0000">piros</b> 7+ gép.</div>';
+if(!res.length)return h+'<div class="card mu">Ebben a lekérésben nincs olyan 10 perc, amikor legalább 3 gép utasai jönnek ki.</div>';
+return h+res.map(function(w){var g=fl.slice(w.i,w.j),c=w.c,tp=g.reduce(function(s,f){return s+f.p},0),col=c>=7?"#ff0000":c>=5?"#b71c1c":"#f39c12",past=nowM>=0&&g[g.length-1].e<nowM,
+nm=c>=7?"piros":c>=5?"vörös":"narancs";
+return '<div class="card" style="border-left:8px solid '+col+(past?';opacity:.45':'')+'"><div style="font-weight:700;color:'+col+'">'+mm(g[0].e)+'–'+mm(g[g.length-1].e)+' · '+c+' gép'+(tp?' · kb. '+tp.toLocaleString("hu-HU")+' utas':'')+(past?' · elmúlt':'')+'</div><div>Érdemes ott lenni: <b>'+mm(g[0].e)+'</b> körül</div><div class="mu" style="margin-top:4px">'+g.map(function(f){return esc(f.c)+' '+mm(f.l)+' → '+mm(f.e)+(f.p?' ('+f.p+' fő)':'')}).join('<br>')+'</div></div>'}).join("")}
+function peakCalc(d){var fl=[],b0=parseInt((d.hours&&d.hours[0]&&d.hours[0].h)||"0")*60;(d.hours||[]).forEach(function(x){(x.items||[]).forEach(function(s){var m=/^(\d{2}):(\d{2})\s+(.*)$/.exec(s);if(!m)return;var l=+m[1]*60+ +m[2];if(l<b0)l+=1440;fl.push({l:l,e:l+20})})});
+fl.sort(function(a,b){return a.e-b.e});var cand=[],i,j,k;
+for(i=0;i<fl.length;i++){j=i;while(j<fl.length&&fl[j].e<fl[i].e+10)j++;if(j-i>=3)cand.push({i:i,j:j,c:j-i})}
+cand.sort(function(a,b){return b.c-a.c||a.i-b.i});var used={},res=[];
+cand.forEach(function(w){for(k=w.i;k<w.j;k++)if(used[k])return;for(k=w.i;k<w.j;k++)used[k]=1;res.push(w)});
+res.sort(function(a,b){return a.i-b.i});return{fl:fl,res:res}}
+function repCompact(){var el=$("rpN");if(!el)return;var d=REPD,now=new Date();
+if(iso(cur)!==iso(now)){el.innerHTML="";return}
+var h='<h3><a href="#repter" style="color:inherit;text-decoration:none">✈️ Reptér – mikor érdemes odaérni ›</a></h3><div class="card">';
+if(!d||isNaN(new Date(d.at))||nowE(d)<0||nowE(d)>=2880){el.innerHTML=h+'<span class="mu">Nincs mai reptéri lekérés. A Reptér oldalon nyomd meg a Frissítés gombot.</span></div>';return}
+var c=peakCalc(d),nm=nowE(d),r=c.res.filter(function(w){return c.fl[w.j-1].e>=nm}),mi=Math.round((now-new Date(d.at))/60000);
+h+=r.length?r.map(function(w){var n=w.c,col=n>=7?"#ff0000":n>=5?"#b71c1c":"#f39c12";return '<div style="color:'+col+';font-weight:700;padding:2px 0">'+mm(c.fl[w.i].e)+'–'+mm(c.fl[w.j-1].e)+' ('+n+' gép)</div>'}).join(""):'<span class="mu">A mai lekérésben már nincs hátralévő csúcs.</span>';
+el.innerHTML=h+'<div class="mu" style="margin-top:6px">Lekérés: '+esc(String(d.at).slice(11,16))+(mi>120?' · ⚠️ régi adat':'')+'</div></div>'}
+function tqVal(id,def){var v=$(id).value;return v===""||isNaN(+v)?def:+v}
+function tqSave(){try{var c=$("tqC0").value,old=JSON.parse(localStorage.getItem("tq")||"{}"),o={c:c,r:$("tqR").value,s:$("tqS").value,p:$("tqP").value,dl:$("tqD").value,x:$("tqX").value,ct:old.c===c?old.ct:Date.now()};localStorage.setItem("tq",JSON.stringify(o))}catch(e){}}
+function tqLoad(){try{var v=JSON.parse(localStorage.getItem("tq")||"{}");$("tqC0").value=v.c||"";$("tqR").value=v.r||"";$("tqS").value=v.s||"";$("tqP").value=v.p||"";$("tqD").value=v.dl||"";$("tqX").value=v.x||""}catch(e){}}
+function tqCalc(){var d=REPD,el=$("tqC");if(!d){el.hidden=true;$("tqN").hidden=false;return}el.hidden=false;$("tqN").hidden=true;var O=$("tqO"),c0=$("tqC0").value;
+try{var ct=JSON.parse(localStorage.getItem("tq")||"{}").ct;$("tqT").textContent=ct?"("+new Date(ct).getHours()+":"+z2(new Date(ct).getMinutes())+(Date.now()-ct>1200000?" ⚠️ régi szám":"")+")":""}catch(e){}
+if(c0===""||isNaN(+c0)){O.innerHTML='<span class="mu">Add meg, hány autó vár most.</span>';return}
+var r=tqVal("tqR",3),s=tqVal("tqS",15),pp=Math.max(1,tqVal("tqP",2)),dl=tqVal("tqD",20),sp=Math.max(1,Math.round(tqVal("tqX",12))),off0=0,prv=-1,fl=[];
+(d.hours||[]).forEach(function(x){(x.items||[]).forEach(function(it){var m=/^(\d{2}):(\d{2})\s/.exec(it);if(!m)return;var l=+m[1]*60+ +m[2]+off0;if(prv>=0&&l<prv-600){off0+=1440;l+=1440}prv=l;var px=/kb\.\s*(\d+)\s*fő/.exec(it);fl.push({l:l,c:(px?+px[1]:0)*s/100/pp})})});
+var n0=nowE(d);if(n0<0){O.innerHTML='<span class="mu">A járatlista dátuma a jövőben van.</span>';return}
+var dem={},mx=0;fl.forEach(function(f){var e0=Math.round(f.l+dl);for(var i=0;i<sp;i++){var t=e0+i;dem[t]=(dem[t]||0)+f.c/sp;if(t>mx)mx=t}});
+var t0=n0,te=Math.min(t0+360,mx+25),q=+c0,bk=0,rows=[];
+if(mx<t0){O.innerHTML='<span class="mu">A járatlistában már nincs hátralévő kijövetel. Kérj friss lekérést.</span>';return}
+for(var t=t0;t<=te;t++){q+=r;var need=(dem[t]||0)+bk,sv=Math.min(q,need);q-=sv;bk=need-sv;rows.push({t:t,q:q,b:bk})}
+var sh=[],cur=null;rows.forEach(function(w){if(w.b>=1){if(!cur){cur={a:w.t,b:w.t,m:w.b};sh.push(cur)}cur.b=w.t;if(w.b>cur.m)cur.m=w.b}else cur=null});
+var H='';
+H+=sh.length?'<div style="font-weight:700;color:#c0392b">Autóhiány várható:</div>'+sh.map(function(x){return '<div style="color:#c0392b">'+mm(x.a)+'–'+mm(x.b)+' · legfeljebb kb. '+Math.round(x.m)+' autónyi utas vár</div>'}).join(""):'<div style="font-weight:700;color:#1f8a4c">Nem várható autóhiány a következő órákban.</div>';
+var W=300,Ht=90,mq=Math.max.apply(null,rows.map(function(w){return w.q}).concat([5])),bw=Math.max(1,(W-30)/rows.length);
+function X(i){return 28+(W-34)*i/Math.max(1,rows.length-1)}function Y(v){return Ht-16-(Ht-24)*v/mq}
+H+='<svg viewBox="0 0 '+W+' '+Ht+'" style="width:100%;margin-top:8px">'+rows.map(function(w,i){return w.b>=1?'<rect x="'+(X(i)-bw/2)+'" y="2" width="'+bw+'" height="'+(Ht-18)+'" fill="#c0392b" opacity=".18"/>':''}).join("")+'<polyline fill="none" style="stroke:var(--ac)" stroke-width="2" points="'+rows.map(function(w,i){return X(i)+","+Y(w.q)}).join(" ")+'"/><text x="2" y="12" style="fill:var(--mu);font-size:10px">'+Math.round(mq)+'</text><text x="2" y="'+(Ht-16)+'" style="fill:var(--mu);font-size:10px">0</text><text x="28" y="'+(Ht-3)+'" style="fill:var(--mu);font-size:10px">'+mm(t0)+'</text><text x="'+(W-6)+'" y="'+(Ht-3)+'" text-anchor="end" style="fill:var(--mu);font-size:10px">'+mm(te)+'</text></svg>';
+H+='<div class="mu" style="margin:8px 0 4px">Várható autók száma a reptéren (10 percenként):</div>';
+H+=rows.filter(function(w,i){return i%10===0}).map(function(w){var cl=w.b>=1?"#c0392b":w.q<5?"#e08a00":"inherit";return '<div class="row"><span>'+mm(w.t)+'</span><b style="color:'+cl+'">'+Math.round(w.q)+' autó'+(w.b>=1?' · '+Math.round(w.b)+' autónyi utas vár':'')+'</b></div>'}).join("");
+H+='<div class="mu" style="margin-top:6px">Egyszerű modell: az autók visszaérése állandó, a kijövetel a leszállás után a megadott késleltetéssel, szétosztva. Az adatok becslések, a saját számaiddal érdemes finomítani.</div>';
+O.innerHTML=H}
+$("tqC").addEventListener("input",function(){tqSave();tqCalc()});tqLoad();
+var REPD=null;
+function repRender(){var d=REPD,h;
+if(!d){h='<div class="card mu">Még nincs lekérés. Nyomd meg a Frissítés gombot.</div>'}
+else{var t=new Date(d.at),mi=Math.round((Date.now()-t.getTime())/60000),age=isNaN(mi)?"":mi<1?"most":mi<60?mi+" perccel ezelőtt":Math.floor(mi/60)+" órával ezelőtt";
+h='<div class="card"><div class="mu">Utolsó lekérés</div><b>'+esc(String(d.at).replace("T"," "))+'</b> <span class="mu">('+age+')</span>'+(mi>120?'<div style="color:#c0392b;font-weight:600;margin-top:4px">⚠️ Régi adat, kérj frissítést.</div>':'')+'</div>'
++peakHtml(d)+'<a class="big" href="#autosor" style="margin:12px 0">🚕 Autó-sor becslés ›</a>'+(d.hours||[]).map(function(x){return '<div class="card"><b>'+esc(x.h)+'</b> <span class="mu">('+(x.n==null?'nincs friss adat':x.n+' gép'+(x.p?' · kb. '+x.p.toLocaleString("hu-HU")+' fő':''))+')</span>'+((x.items||[]).length?'<div style="margin-top:6px;line-height:1.7">'+x.items.map(esc).join('<br>')+'</div>':'<div class="mu" style="margin-top:6px">'+esc(x.note||"Nincs járat.")+'</div>')+'</div>'}).join("")
++(d.note?'<p class="mu">'+esc(d.note)+'</p>':'')}
+$("rpB").innerHTML=h;tqCalc()}
+var MODEL=null,REPS={a:null,b:null},REPDB=null,REPU=null,
+FBA={W6:[215,"wizz"],W4:[215,"wizz"],"5W":[215,"wizz"],FR:[190,"ryanair"],RK:[190,"ryanair"],U2:[180,"lcc"],DY:[189,"lcc"],HV:[189,"lcc"],LH:[165,"leg"],LX:[150,"leg"],OS:[140,"leg"],AF:[150,"leg"],KL:[105,"leg"],BA:[170,"leg"],SN:[145,"leg"],SK:[150,"leg"],AY:[150,"leg"],LO:[120,"leg"],EI:[174,"leg"],IB:[150,"leg"],TP:[150,"leg"],A3:[170,"leg"],TK:[190,"leg"],LY:[170,"leg"],IZ:[190,"leg"],"6H":[180,"leg"],FZ:[170,"leg"],RO:[130,"leg"],FM:[260,"leg"],NP:[168,"ch"]},
+FBL={wizz:[.844,.86,.9,.889,.91,.93,.937,.94,.92,.912,.89,.859],ryanair:[.9,.9,.92,.93,.94,.95,.96,.96,.95,.93,.92,.92],lcc:[.86,.86,.89,.9,.91,.92,.93,.93,.92,.9,.88,.87],leg:[.72,.72,.76,.78,.8,.83,.85,.85,.82,.79,.75,.74],ch:[.88,.88,.85,.85,.87,.9,.92,.92,.9,.87,.85,.88]},
+FAR=["baku","yerevan","jerevan","reykjav","sharm","kairo","cairo","tenerife","funchal","dubaj","dubai","abu dh","abu dz"],
+MULTI={LHR:"Heathrow",LTN:"Luton",STN:"Stansted",LGW:"Gatwick",MXP:"Malpensa",BGY:"Bergamo",LIN:"Linate",CIA:"Ciampino",FCO:"Fiumicino",BVA:"Beauvais",CDG:"Charles de Gaulle",ORY:"Orly",CRL:"Charleroi",WMI:"Modlin"};
+function cityClean(c){c=String(c||"").trim();var m=/^(.*?)\s+([A-Z]{3})$/.exec(c);if(!m)return c;return MULTI[m[2]]?m[1]+" ("+MULTI[m[2]]+")":m[1]}
+function paxOf(code,city,mo){var pre=(String(code||"").replace(/\s+/g,"").match(/^[A-Z0-9]{2}/)||[""])[0],al=0,lf=null;
+if(MODEL&&MODEL.airlines&&MODEL.airlines[pre]){var a=MODEL.airlines[pre];al=a.seats;lf=MODEL.lf&&MODEL.lf[a.lf]&&MODEL.lf[a.lf].monthly_est}
+if((!al||!lf)&&FBA[pre]){al=FBA[pre][0];lf=FBL[FBA[pre][1]]}
+if(!al||!lf)return{p:Math.round(160*FBL.lcc[mo]/5)*5,u:pre};
+var cn=String(city||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+if(/^(W6|W4|5W)$/.test(pre)&&FAR.some(function(f){return cn.indexOf(f)>=0}))al=239;
+return{p:Math.round(al*lf[mo]/5)*5}}
+function mins(s){var m=/^(\d{1,2}):(\d{2})$/.exec(String(s||"").trim());return m?+m[1]*60+ +m[2]:null}
+function dayIso(base,off){var d=new Date(base.getFullYear(),base.getMonth(),base.getDate()+off);return iso(d)}
+var RPPROMPT='You are reading screenshots of the Budapest Airport (bud.hu) ARRIVALS flight list, in Hungarian. Each flight card shows: a crossed-out planned time (small, top-left), the expected/actual time in a light-blue box under it, the city name followed by an airport code, the flight number (for example "W6 2330"), and a status badge on the right ("Leszállt", "Várható", "Késik", "Törölve", ...). A light-blue date divider such as "2026.11.16." may appear between cards: the cards below it are on that date. The phone status bar shows a clock (for example "22:59").\nReturn ONLY JSON of this shape: {"shot_time":"HH:MM","images":[{"flights":[{"flight":"W6 2330","city":"Tel-Aviv TLV","planned":"23:25","expected":"23:41","status":"Várható","divider_date":null}]}]}\nRules: "shot_time" is the clock in the status bar of the LAST image (null if not visible). "images" has one object per input image, in the order given. List every flight card visible in that image, top to bottom. If a card is cut off so that the expected time is not fully readable, set "expected" to null. "divider_date" is the date (YYYY-MM-DD) of a date divider located ABOVE that card inside the SAME image, otherwise null. Copy city and flight text exactly as shown. Do not invent anything that is not visible.';
+async function rpRun(files){var st=$("rpSt"),S,lim;try{S=await claude.use("sample");lim=await S.limits()}catch(e){st.textContent="A képfeldolgozás nem érhető el.";return}
+if(!lim||!lim.images){st.textContent="A képfeltöltés ebben a nézetben nem érhető el.";return}
+var max=lim.images.maxCount||4,ch=[],i;for(i=0;i<files.length;i+=max)ch.push([].slice.call(files,i,i+max));
+var imgs=[],shot=null;
+for(var c=0;c<ch.length;c++){st.textContent="Képek elemzése ("+(c+1)+"/"+ch.length+")… ez akár 1–2 percig is tarthat.";
+var r=await S.json(RPPROMPT,{images:ch[c]});if(r&&r.shot_time)shot=r.shot_time;(r&&r.images||[]).forEach(function(x){imgs.push((x&&x.flights)||[])})}
+var now=new Date(),nm=now.getHours()*60+now.getMinutes(),sm=mins(shot),base=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+if(sm==null)sm=nm;else if(sm>nm+120)base.setDate(base.getDate()-1);
+var seen={},L=[],unk={},canc=0,tot=0;
+imgs.forEach(function(fl){fl.forEach(function(f){var p=mins(f.planned);if(p==null)return;tot++;var off=0;
+if(f.divider_date&&/^\d{4}-\d{2}-\d{2}$/.test(f.divider_date)){var dd=new Date(f.divider_date+"T00:00");off=Math.max(0,Math.round((dd-base)/864e5))}
+else if(sm>=720&&p<360)off=1;
+var pa=off*1440+p,e=mins(f.expected),ea=null;if(e!=null){ea=off*1440+e;if(ea<pa-720)ea+=1440;else if(ea>pa+720)ea-=1440}
+var key=String(f.flight||"").replace(/\s+/g,"")+"|"+pa;if(seen[key]){if(ea!=null&&seen[key].ea==null){seen[key].ea=ea;seen[key].st=f.status}return}
+var o2={flight:f.flight,city:f.city,pa:pa,ea:ea,st:String(f.status||"")};seen[key]=o2;L.push(o2)})});
+var start=Math.floor(sm/60)*60,end=start+360,last=0,hours=[],tp=0,tn=0;
+L.forEach(function(x){if(x.pa>last)last=x.pa});
+var sel=L.filter(function(x){var t=x.ea!=null?x.ea:x.pa;if(/törölve|cancel/i.test(x.st)){if(t>=start&&t<end)canc++;return false}return t>=start&&t<end}).sort(function(a,b){return(a.ea!=null?a.ea:a.pa)-(b.ea!=null?b.ea:b.pa)});
+for(var k=0;k<6;k++){var b0=start+60*k,b1=b0+60,it=[],n=0,p=0;
+sel.forEach(function(x){var t=x.ea!=null?x.ea:x.pa;if(t<b0||t>=b1)return;var px=paxOf(x.flight,x.city,new Date(base.getFullYear(),base.getMonth(),base.getDate()+Math.floor(t/1440)).getMonth());if(px.u)unk[px.u]=1;
+var dl=x.ea!=null?x.ea-x.pa:0,nt=dl>=15?" (késik "+dl+" perc)":dl<=-15?" (korábban "+(-dl)+" perc)":"";
+it.push(mm(t)+" "+cityClean(x.city)+nt+(x.ea==null?"*":"")+" · kb. "+px.p+" fő");n++;p+=px.p});
+var h={h:mm(b0)+"–"+mm(b1),items:it,n:n,p:p};if(!n)h.note=b0>last?"A képeken nem látszik (a lista a "+mm(last)+"-ig tart). Tölts fel még képet lejjebb görgetve.":"Nincs járat.";hours.push(h);tp+=p;tn+=n}
+var D={at:iso(base)+"T"+mm(sm),hours:hours,ts:Date.now(),note:"Forrás: a feltöltött bud.hu képernyőképek, várható idők szerint."+(L.some(function(x){return x.ea==null})?" * A várható idő nem látszott, a tervezett idő szerepel.":"")+(canc?" Törölt járat az ablakban: "+canc+".":"")+" Az utasszám becslés: ülésszám × kihasználtság (airport/model). Nem tudjuk, hány utas választ taxit."+(Object.keys(unk).length?" Ismeretlen légitársaság (általános becslés): "+Object.keys(unk).join(", ")+".":"")};
+REPS.b=D;repSet();
+var saved=false;try{if(REPDB){try{await REPDB.doc("airport/latest").set(D);saved=true}catch(e){}if(REPU){await REPDB.doc("data/users/"+REPU+"/airport").set(D);saved=true}}}catch(e){}
+st.textContent="Kész: "+L.length+" különböző járat felismerve, ebből "+tn+" esik a következő 6 órába (kb. "+tp+" utas)."+(saved?" Mentve.":" A mentés nem sikerült, csak ebben a nézetben látszik.");
+toast("Lekérés feldolgozva ✔",true)}
+$("rpGo").onclick=function(){var f=$("rpF").files;if(!f||!f.length){toast("Válassz ki képeket",false);return}$("rpGo").disabled=true;rpRun(f).catch(function(e){$("rpSt").textContent="Hiba: "+((e&&e.code)||(e&&e.message)||"ismeretlen")+". Próbáld újra kevesebb képpel."}).then(function(){$("rpGo").disabled=false})};
+function repSet(){var a=REPS.a,b=REPS.b;REPD=!a?b:!b?a:(String(b.at)>=String(a.at)?b:a);repRender();repCompact()}
+var MODEL=null,SMP=null,DBL=null,APN={LTN:"Luton",STN:"Stansted",LHR:"Heathrow",LGW:"Gatwick",CIA:"Ciampino",FCO:"Fiumicino",MXP:"Malpensa",BGY:"Bergamo",BVA:"Beauvais",ORY:"Orly",CDG:"Charles de Gaulle",CRL:"Charleroi",WMI:"Modlin",NYO:"Skavsta"};
+function nrm(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+function paxFor(f,mo){var pre=String(f.flight||"").replace(/\s+/g,"").slice(0,2).toUpperCase(),M=MODEL||{},al=(M.airlines||{})[pre],seats=al?al.seats:160,cat=al?al.lf:"legacy";
+var far=(M.far_routes_wizz_a321||[]).some(function(c){return nrm(f.city).indexOf(nrm(c))>=0});if(far&&(["W6","W4","5W"].indexOf(pre)>=0||!al)){seats=239;cat="wizz"}
+var a=M.lf&&M.lf[cat]&&M.lf[cat].monthly_est,lf=a?a[mo]:.8;return Math.round(seats*lf/5)*5}
+function cityLbl(f){var c=String(f.city||"").replace(/\s+[A-Z]{3}$/,"").trim(),k=f.airportCode||((/\s([A-Z]{3})$/.exec(String(f.city||""))||[])[1]);return c+(k&&APN[k]?" ("+APN[k]+")":"")}
+function buildDoc(fl){var now=new Date(),base=new Date(now.getFullYear(),now.getMonth(),now.getDate()),mo=now.getMonth(),arr=[],last=0;
+function mins(d0,t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||"");if(!m)return null;var d=new Date(d0+"T00:00");if(isNaN(d))d=base;return Math.round((d-base)/864e5)*1440+ +m[1]*60+ +m[2]}
+fl.forEach(function(f){if(!f||!f.planned)return;var pl=mins(f.date,f.planned),ex=mins(f.date,f.expected),t=ex!=null?ex:pl;if(t==null)return;if(t>last)last=t;var st=String(f.status||"").toLowerCase();if(st==="landed"||st==="cancelled")return;arr.push({t:t,late:ex!=null&&pl!=null?ex-pl:0,unk:ex==null,f:f})});
+var s0=now.getHours()*60,hours=[];
+for(var i=0;i<6;i++){var a=s0+i*60,b=a+60,it=arr.filter(function(x){return x.t>=a&&x.t<b}).sort(function(x,y){return x.t-y.t}),p=0,items=it.map(function(x){var px=paxFor(x.f,mo);p+=px;return mm(x.t)+" "+cityLbl(x.f)+(x.unk?"*":"")+(x.late>=15?" (késik "+x.late+" perc)":"")+" · kb. "+px+" fő"});
+var lab=mm(a)+"–"+mm(b)+(a>=1440?" ("+new Date(base.getTime()+Math.floor(a/1440)*864e5).toLocaleDateString("hu-HU",{month:"short",day:"numeric"})+")":"");
+var h={h:lab,items:items,n:items.length,p:p};if(!items.length)h.note=a>=last?"A képeken nem látszik (a lista a "+mm(last)+"-os járatnál ér véget). Küldj még egy képet lejjebb görgetve.":"Nincs hátralévő járat.";hours.push(h)}
+var at=base.getFullYear()+"-"+z2(base.getMonth()+1)+"-"+z2(base.getDate())+"T"+z2(now.getHours())+":"+z2(now.getMinutes());
+return{at:at,hours:hours,note:"Forrás: a bud.hu járatlistájának feltöltött képernyőképei, várható idők szerint. * A várható idő nem látszott, a tervezett idő szerepel. Az utasszám becslés: ülésszám × kihasználtság (airport/model adatok). Nem tudjuk, hány utas választ taxit."}}
+function rpMsg(t){$("rpM").textContent=t}
+var PIC=[];
+function rpCount(){$("rpCnt").textContent=PIC.length?PIC.length+" kép kiválasztva":""}
+$("rpPk").onclick=function(){$("rpF").click()};$("rpCam").onclick=function(){$("rpC").click()};$("rpClr").onclick=function(){PIC=[];rpCount();rpMsg("")};
+["rpF","rpC"].forEach(function(id){$(id).onchange=function(){[].forEach.call(this.files||[],function(f){PIC.push(f)});this.value="";rpCount()}});
+$("rpPs").addEventListener("paste",function(e){e.preventDefault();var fs=(e.clipboardData&&e.clipboardData.files)||[];[].forEach.call(fs,function(f){if(/^image\//.test(f.type))PIC.push(f)});rpCount()});
+$("rpPs").addEventListener("keydown",function(e){if(!(e.ctrlKey||e.metaKey))e.preventDefault()});
+async function repUp(){var fs=PIC.slice();if(!fs.length){rpMsg("Válassz ki legalább egy képet.");return}
+var lim=null;try{lim=await SMP.limits()}catch(e){}if(lim&&lim.images&&fs.length>lim.images.maxCount){rpMsg("Legfeljebb "+lim.images.maxCount+" képet lehet egyszerre feltölteni.");return}
+var td=iso(new Date());$("rpGo").disabled=true;rpMsg("Feldolgozás… (Claude kiolvassa a képeket, ez eltarthat egy percig)");
+var pr="You are reading screenshots of the Budapest Airport (bud.hu) ARRIVALS list. Each flight card shows: a struck-through time (the planned arrival), a blue box with the expected or actual time, the origin city (sometimes followed by a 3-letter airport code such as BGY), the flight number (for example 'W6 2330'), and a status label on the right: 'Leszállt' (landed), 'Várható' (expected), 'Késik' (delayed), 'Törölve' (cancelled). Lines saying 'Codeshare járat' are not flights. A date bar such as '2026.11.16.' means all following flights are on that date. Flights before any date bar are on "+td+" unless the times wrap past midnight (then the following flights are on the next day). The phone clock is visible in the status bar of each screenshot. Return ONLY JSON, no markdown, in this shape: {\"shotTime\":\"HH:MM or null\",\"flights\":[{\"planned\":\"HH:MM\",\"expected\":\"HH:MM or null\",\"city\":\"city name\",\"airportCode\":\"3 letters or null\",\"flight\":\"W6 2330\",\"status\":\"landed|expected|delayed|cancelled|other\",\"date\":\"YYYY-MM-DD\"}]}. Include every flight card that is fully readable in any screenshot exactly once (the screenshots overlap, so deduplicate by flight number and planned time). If the expected time is not visible for a card, use null. Never invent flights.";
+try{var data=await SMP.json(pr,{images:fs}),fl=(data&&data.flights)||[],seen={},u=[];fl.forEach(function(f){var k=(f.flight||"")+"|"+f.planned+"|"+f.date;if(!seen[k]){seen[k]=1;u.push(f)}});
+if(!u.length){rpMsg("Nem találtam járatot a képeken. Próbáld élesebb, teljes képernyős képpel.");$("rpGo").disabled=false;return}
+var doc=buildDoc(u);REPD=doc;repRender();repCompact();var sh=data.shotTime,w="";
+if(sh){var m=/^(\d{1,2}):(\d{2})$/.exec(sh);if(m){var dm=Math.abs((new Date().getHours()*60+new Date().getMinutes())-(+m[1]*60+ +m[2]));if(dm>20&&dm<1200)w=" ⚠️ A képek "+dm+" perccel régebbiek a mostani időnél."}}
+PIC=[];rpCount();rpMsg("Kész: "+u.length+" járatot olvastam ki."+w);
+if(DBL){try{await DBL.set(doc)}catch(e){rpMsg("Kész ("+u.length+" járat), de a felhőbe nem sikerült menteni, ezért csak ezen az eszközön látszik."+w)}}}
+catch(e){var c=e&&e.code;rpMsg(c==="not_granted"?"A feldolgozáshoz engedélyezned kell a Claude használatát.":c==="rate_limited"?"Túl sok kérés, várj egy kicsit.":c==="images_unavailable"?"Ebben a nézetben nem küldhetők képek.":"Nem sikerült a feldolgozás ("+(c||"hiba")+").")}
+$("rpGo").disabled=false}
+async function repInit(){try{if(typeof claude==="undefined")return;var DB=await claude.use("db");if(DB){DBL=DB.doc("airport/latest");DBL.onSnapshot(function(s){REPD=s.exists?s.data():null;repRender();repCompact()},function(){});DB.doc("airport/model").onSnapshot(function(s){MODEL=s.exists?s.data():null},function(){})}
+SMP=await claude.use("sample");if(SMP){var lim=null;try{lim=await SMP.limits()}catch(e){}if(lim&&lim.images){$("rpU").hidden=false;try{$("rpF").accept=lim.images.mediaTypes.join(",")}catch(e){}$("rpGo").onclick=repUp}}}catch(e){}}
+
+var SEAT=[[/A321/,220],[/A320/,180],[/A319/,144],[/A318/,110],[/A33\d|A34\d/,290],[/A35\d/,300],[/A38\d/,500],[/A220|BCS/,130],[/737.?(600|700)/,140],[/737/,189],[/777/,330],[/787/,270],[/767/,220],[/747/,400],[/E.?195/,120],[/E.?190/,100],[/E.?17\d/,76],[/ATR|AT7/,70],[/Q400|DH8|Dash 8/,78],[/CRJ/,80]];
+function paxApi(f,city,mo){var pre=String(f.number||"").replace(/\s+/g,"").slice(0,2).toUpperCase(),md=String((f.aircraft&&f.aircraft.model)||""),s=0;
+SEAT.some(function(x){if(x[0].test(md)){s=x[1];return true}});
+if(!s)return paxOf(f.number,city,mo).p;
+if(/^(W6|W4|5W)$/.test(pre)&&s===220)s=239;
+var fa=FBA[pre],lf=(FBL[fa?fa[1]:"leg"]||FBL.leg)[mo];return Math.round(s*lf/5)*5}
+function lcl(d){return d.getFullYear()+"-"+z2(d.getMonth()+1)+"-"+z2(d.getDate())+"T"+z2(d.getHours())+":"+z2(d.getMinutes())}
+function acfg(){try{return JSON.parse(localStorage.getItem("apicfg")||"{}")}catch(e){return{}}}
+function acfgAsk(){var c=acfg(),k=prompt("RapidAPI kulcs (X-RapidAPI-Key)",c.k||"");if(k&&k.trim()){try{localStorage.setItem("apicfg",JSON.stringify({k:k.trim()}))}catch(e){}return acfg()}return null}
+function lt(s){var m=/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/.exec(s||"");return m?{d:m[1],m:+m[2]*60+ +m[3]}:null}
+async function apiRun(){var st=$("apiSt"),c=acfg();
+if(!c.k&&(!c.u||!c.t)){c=acfgAsk();if(!c){st.textContent="Add meg a RapidAPI kulcsot (⚙).";return}}
+var now=new Date(),base=new Date(now.getFullYear(),now.getMonth(),now.getDate()),sm=now.getHours()*60+now.getMinutes(),start=Math.floor(sm/60)*60,end=start+360,
+f0=new Date(base),f1=new Date(base);f0.setMinutes(start);f1.setMinutes(end-1);
+st.textContent="Lekérés…";
+var r=c.k?await fetch("https://aerodatabox.p.rapidapi.com/flights/airports/iata/BUD/"+lcl(f0)+"/"+lcl(f1)+"?direction=Arrival&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false&withLocation=false",{headers:{"X-RapidAPI-Key":c.k,"X-RapidAPI-Host":"aerodatabox.p.rapidapi.com"}}):await fetch(c.u+"/?from="+lcl(f0)+"&to="+lcl(f1),{headers:{"x-app-token":c.t}});
+if(r.status===401||r.status===403){st.textContent="Hibás kulcs vagy nincs előfizetés az Aero DataBoxra (⚙).";return}
+if(!r.ok){st.textContent="Hiba: "+r.status+(r.status===429?" (elfogyott a lekérési keret)":"");return}
+var j=await r.json(),A=j.arrivals||[],L=[],seen={},canc=0;
+function ab(x){return Math.round((new Date(x.d+"T00:00")-base)/864e5)*1440+x.m}
+A.forEach(function(f){var mv=f.movement||{};if(f.isCargo)return;if(f.codeshareStatus&&f.codeshareStatus!=="IsOperator")return;
+var p=lt((mv.scheduledTime||{}).local);if(!p)return;var e=lt((mv.runwayTime||mv.revisedTime||mv.predictedTime||{}).local)||p,pa=ab(p),ea=ab(e),
+key=String(f.number||"").replace(/\s+/g,"")+"|"+pa;if(seen[key])return;seen[key]=1;
+var ap=mv.airport||{},cn=ap.municipalityName||ap.name||ap.iata||"?";if(ap.iata&&MULTI[ap.iata])cn+=" ("+MULTI[ap.iata]+")";
+L.push({f:f,pa:pa,ea:ea,city:cn,cx:/cancel/i.test(f.status||"")})});
+var sel=L.filter(function(x){if(x.cx){if(x.ea>=start&&x.ea<end)canc++;return false}return x.ea>=start&&x.ea<end}).sort(function(a,b){return a.ea-b.ea}),hours=[],tp=0,tn=0;
+for(var q=0;q<6;q++){var b0=start+60*q,b1=b0+60,it=[],n=0,p2=0;
+sel.forEach(function(x){if(x.ea<b0||x.ea>=b1)return;var mo=new Date(base.getFullYear(),base.getMonth(),base.getDate()+Math.floor(x.ea/1440)).getMonth(),px=paxApi(x.f,x.city,mo),dl=x.ea-x.pa,nt=dl>=15?" (késik "+dl+" perc)":dl<=-15?" (korábban "+(-dl)+" perc)":"";it.push(mm(x.ea)+" "+x.city+nt+" · kb. "+px+" fő");n++;p2+=px});
+var h={h:mm(b0)+"–"+mm(b1),items:it,n:n,p:p2};if(!n)h.note="Nincs járat.";hours.push(h);tp+=p2;tn+=n}
+var D={at:lcl(now),hours:hours,ts:Date.now(),note:"Forrás: Aero DataBox, várható/tényleges idők szerint. Utasszám becslés: géptípus ülésszáma × kihasználtság. Nem tudjuk, hány utas választ taxit."+(canc?" Törölt járat az ablakban: "+canc+".":"")};
+REPS.b=D;repSet();try{localStorage.setItem("repd",JSON.stringify(D))}catch(e){}
+st.textContent="Kész: "+tn+" járat a következő 6 órában (kb. "+tp+" utas)."}
+$("apiGo").onclick=function(){var b=this;b.disabled=true;apiRun().catch(function(e){$("apiSt").textContent="Hiba: "+((e&&e.message)||e)+" (hálózat vagy CORS?)"}).then(function(){b.disabled=false})};
+$("apiCfg").onclick=acfgAsk;
+try{var sd=JSON.parse(localStorage.getItem("repd")||"null");if(sd){REPS.a=sd;repSet()}}catch(e){}
+var SHT=0,SHH="";
+function show(){var tn=Date.now();if(tn-SHT<80&&location.hash===SHH)return;SHT=tn;SHH=location.hash;var h=location.hash.replace("#",""),v="home",m;if(h==="szorakozohelyek"){history.replaceState(null,"","#naptar");h="naptar"}if(["naptar","penzugyek","elorendelesek","szorakozohelyek","szimulacio","repter","autosor"].indexOf(h)>=0)v=h;
+else if(m=/^cim-(\d+)$/.exec(h))v=cimV(+m[1])?"cim":"elorendelesek";else if(m=/^dispo-(\d+)$/.exec(h))v=dispoV(+m[1])?"dispo":"elorendelesek";else if(m=/^nap-(\d{4}-\d{2}-\d{2})$/.exec(h))v=napV(m[1])?"nap":"penzugyek";else if(m=/^hely-([a-z0-9]+)$/.exec(h))v=helV(m[1])?"hely":"naptar";
+["home","naptar","penzugyek","elorendelesek","cim","dispo","nap","szorakozohelyek","hely","szimulacio","repter","autosor"].forEach(function(x){$("v-"+x).hidden=x!==v});window.scrollTo(0,0);
+if(v==="penzugyek"){if(prevV==="home"||prevV==="")off=0;fin()}if(v==="elorendelesek")preV();if(v==="naptar")draw();if(v==="szimulacio")simV();if(v==="repter")repRender();if(v==="autosor")tqCalc();if(v!=="szimulacio"&&document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}prevV=v}
+var navD=0;
+window.addEventListener("hashchange",show);
+window.addEventListener("popstate",function(){navD=(history.state&&history.state.n)||0;show()});
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href^='#']");if(!a||e.defaultPrevented||e.metaKey||e.ctrlKey||e.button)return;var hr=a.getAttribute("href");
+if(a.classList.contains("back")||a.classList.contains("zBk")){e.preventDefault();if(navD>0){history.back()}else{history.replaceState({n:0},"",location.pathname+location.search+(hr==="#"?"":hr));show()}return}
+if(hr.length>1){e.preventDefault();navD++;history.pushState({n:navD},"",location.pathname+location.search+hr);show()}});
+function pmin(t){var p=t.split(":");return+p[0]*60+ +p[1]}
+function openNow(v,dt){if(!v.h)return null;var m=dt.getHours()*60+dt.getMinutes(),dw=(dt.getDay()+6)%7,py=new Date(dt);py.setDate(py.getDate()-1);var t=v.h[dw],pv=v.h[(dw+6)%7],q,s,e;
+if(t&&!(v.cl&&v.cl.indexOf(iso(dt))>=0)){q=t.split("–");s=pmin(q[0]);e=pmin(q[1]);if(e>s?(m>=s&&m<e):m>=s)return q[1]}
+if(pv&&!(v.cl&&v.cl.indexOf(iso(py))>=0)){q=pv.split("–");s=pmin(q[0]);e=pmin(q[1]);if(e<=s&&m<e)return q[1]}
+return""}
+function vl(v,r){return '<div class="row"><span><a href="#hely-'+v.id+'" style="color:inherit;text-decoration:none">'+esc(v.n)+'</a></span><b>'+r+'</b></div>'}
+function szSec(){var now=new Date(),isT=iso(now)===iso(cur),dw=(cur.getDay()+6)%7,op=[],cl=[],un=[];
+SZ.forEach(function(v){if(isT){var r=openNow(v,now);if(r===null)un.push(v.n);else if(r)op.push(vl(v,"zárás: "+r));else cl.push(v.n)}else{if(v.cl&&v.cl.indexOf(iso(cur))>=0)cl.push(v.n+" (ünnepi zárva)");else if(!v.h)un.push(v.n);else if(v.h[dw])op.push(vl(v,v.h[dw]));else cl.push(v.n)}});
+var hh=("0"+now.getHours()).slice(-2)+":"+("0"+now.getMinutes()).slice(-2);
+$("szN").innerHTML='<h3>Szórakozóhelyek – '+(isT?'most nyitva ('+hh+')':'ezen a napon nyitva')+'</h3><div class="card">'+(op.join("")||'<span class="mu">Nincs megerősített nyitvatartás.</span>')+'</div>'+(cl.length?'<div class="mu" style="margin-top:6px">Zárva: '+cl.map(esc).join(", ")+'</div>':'')+(un.length?'<div class="mu" style="margin-top:6px">Nyitvatartás nincs megerősítve: '+un.map(esc).join(", ")+'</div>':'')}
+function szL(){$("szL").innerHTML='<h3>Koncerthelyek</h3>'+SZ.filter(function(v){return v.t==="k"}).map(vb).join("")+'<h3>Bulihelyek</h3>'+SZ.filter(function(v){return v.t==="b"}).map(vb).join("")+'<p class="mu">A buli-programokat (DJ-k, jegyes esték) még nem találtam meg. A „javaslat” helyeket és a színházi előadások hosszát én becsültem.</p>'}
+var DRT="1:B22,G18;2:B22;6:M23,R0,B22,S0,E23;7:M23,R0,B22,V22,S0,O20,E23;13:M23,R0,B22,E23;14:M23,R0,B22,V22,E23;18:B22;19:B22;20:M23,R0,B22,E23;21:M23,R0,B22,V22,G20,O20,E23;22:B22;24:V22;26:G23;27:M23,R0,B22,E23;28:M23,R0,B22,V22,O20,E23;29:G17;30:B22",
+DRN={M:["Morrison’s","morr"],R:["REMIX","remix"],B:["Barba Negra","barba"],V:["MVM Dome","mvm"],G:["Groupama",""],S:["Symbol","sym"],O:["Óbuda Bay","obay"],E:["Erzsébet tér",""]},DR={};
+DRT.split(";").forEach(function(x){var p=x.split(":");DR["2026-11-"+("0"+p[0]).slice(-2)]=p[1].split(",").map(function(y){return[y.charAt(0),+y.slice(1)]})});
+function drSec(){var k=iso(cur),a=DR[k],h='<h3>🚕 Drosztok ezen a napon</h3><div class="card">';
+if(k.slice(0,7)!=="2026-11")h+='<span class="mu">Ehhez a hónaphoz még nincs droszt-beosztás.</span>';
+else if(!a)h+='<span class="mu">Erre a napra nincs kiemelt droszt.</span>';
+else h+=a.slice().sort(function(x,y){return(x[1]||24)-(y[1]||24)}).map(function(e){var d=DRN[e[0]],t=e[1]===0?"00:00 (éjfél)":("0"+e[1]).slice(-2)+":00";return '<div class="row"><span>'+(d[1]?'<a href="#hely-'+d[1]+'" style="color:inherit;text-decoration:none">'+esc(d[0])+'</a>':esc(d[0]))+'</span><b>nyitás: '+t+'</b></div>'}).join("");
+$("drN").innerHTML=h+'</div>'}
+var _dr=draw;draw=function(){_dr();szSec();drSec();repCompact()};
+szL();draw();
+function stat(t){var e=$("synS");if(e)e.textContent=t}
+function hm(){var d=new Date();return("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function rawv(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function belongs(id,k){return id===k||id.indexOf(k+"_")===0}
+function docsOf(k){var v=rawv(k),g={};if(k==="rides"||k==="fuel"){(v||[]).forEach(function(x){var n=k+"_"+((x.t||"").slice(0,7)||"0000-00");(g[n]=g[n]||[]).push(x)});return g}if(v!=null)g[k]=v;return g}
+function sched(){if(!SYN.ready)return;clearTimeout(SYN.tm);SYN.tm=setTimeout(push,900);stat("☁️ Mentés folyamatban…")}
+async function push(){if(!SYN.ready)return;if(SYN.busy){SYN.tm=setTimeout(push,700);return}SYN.busy=true;
+try{for(var i=0;i<SK.length;i++){var k=SK[i],want=docsOf(k),lt0=lts(k),ts=lt0>1?lt0:Date.now(),id;if(lt0<=1&&Object.keys(want).length)sts(k,ts);
+for(id in want){var js=JSON.stringify(want[id]);if(SYN.last[id]===js)continue;await SYN.col.doc(id).set({v:want[id],ts:ts});SYN.last[id]=js}
+for(id in SYN.last){if(belongs(id,k)&&!(id in want)){await SYN.col.doc(id).delete();delete SYN.last[id]}}}
+stat("☁️ Szinkronizálva: "+hm())}catch(e){stat("⚠️ A felhős mentés nem sikerült ("+((e&&e.code)||"hiba")+"), újra próbálom…");SYN.tm=setTimeout(push,15000)}
+SYN.busy=false}
+function reloadMem(){R=ld("rides");F=ld("fuel");C=ld("ceg");try{FW=JSON.parse(localStorage.getItem("fw")||"{}")}catch(e){FW={}}try{SS=JSON.parse(localStorage.getItem("simst")||"{}")}catch(e){SS={}}
+try{var ow=JSON.parse(localStorage.getItem("own")||"[]");EV=EV.filter(function(e){return!e.own}).concat(ow)}catch(e){}}
+function recon(snap,def){var rem={},changed=false,first=localStorage.getItem("synced")!=="1",lo=[];SYN.last={};SK.forEach(function(k){if(!lts(k)&&localStorage.getItem(k)!=null)sts(k,1)});
+snap.docs.forEach(function(d){var id=d.id,x=d.data()||{},k=SK.filter(function(s){return belongs(id,s)})[0];if(!k)return;SYN.last[id]=JSON.stringify(x.v);var r=rem[k]=rem[k]||{v:null,ts:0};r.ts=Math.max(r.ts,x.ts||0);if(k==="rides"||k==="fuel")r.v=(r.v||[]).concat(x.v||[]);else r.v=x.v});
+SK.forEach(function(k){var r=rem[k],lt=lts(k);
+if(r&&r.ts>lt){if(first&&(k==="rides"||k==="fuel")){var loc=rawv(k)||[],ids={};r.v.forEach(function(x){ids[x.id]=1});var cur0={};loc.forEach(function(x){cur0[x.id]=1});
+if(k==="rides")lo=loc.filter(function(x){return!ids[x.id]});var u=r.v.concat(loc.filter(function(x){return!ids[x.id]}));try{localStorage.setItem(k,JSON.stringify(u))}catch(e){}sts(k,Date.now());SYN.need=true}
+else{try{localStorage.setItem(k,JSON.stringify(r.v))}catch(e){}sts(k,r.ts)}changed=true}
+else if(def&&lt>(r?r.ts:0)){SYN.need=true}});
+if(changed){reloadMem();lo.forEach(function(x){if(x.co)link(x)});reloadMem();recent();try{draw()}catch(e){}try{sStat()}catch(e){}show()}
+if(def){try{localStorage.setItem("synced","1")}catch(e){}if(!SYN.ready){SYN.ready=true}if(SYN.need){SYN.need=false;SYN.last=SYN.last;sched()}else stat("☁️ Szinkronizálva: "+hm())}}
+async function syncInit(){stat("Csak ezen az eszközön tárolódik (a felhős mentés nem elérhető).");
+try{if(typeof claude==="undefined")return;var US=await claude.use("user"),DB=await claude.use("db");if(!US||!DB)return;var id=await US.id();if(!id)return;
+SYN.col=DB.collection("data/users/"+id);stat("☁️ Szinkronizálás…");
+setTimeout(function(){if(!SYN.ready)stat("⚠️ A felhő nem válaszol, egyelőre csak ezen az eszközön tárolódik.")},10000);
+SYN.col.onSnapshot(function(s){recon(s,!s.metadata.fromCache)},function(e){stat("⚠️ A felhős mentés nem érhető el ("+((e&&e.code)||"hiba")+")")})}catch(e){stat("⚠️ A felhős mentés nem érhető el.")}}
+$("synB").onclick=function(){if(!SYN.col||!SYN.ready){toast("A felhős mentés most nem érhető el",false);return}stat("☁️ Szinkronizálás…");SYN.col.get().then(function(s){SYN.need=true;recon(s,true)}).catch(function(){stat("⚠️ A szinkronizálás nem sikerült.")})};
+window.svx=function(k,v){return sv(k,v)};
+$("napB").onclick=$("recent").onclick;
+cx();recent();show();syncInit();repInit();
+})();
+</script>
+</body>
+</html>
